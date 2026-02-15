@@ -6,7 +6,7 @@
 - Member 3: [Darren Nugent] - [22365893] - *** Service
 - Member 4: [Kevin Burke] - [22355634] - *** Service
 - Member 5: [Michael Cronin] - [22336842] - *** Service
-- Member 5: [Muadh Muhsin Zibiri] - [22235302] - *** Service
+- Member 6: [Muadh Muhsin Zibiri] - [22235302] - *** Service
 
 ## Project Overview
 A campus facility booking system for University of Limerick that allows 
