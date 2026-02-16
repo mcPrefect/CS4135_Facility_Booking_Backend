@@ -1,29 +1,42 @@
-# Campus Facility Booking System
+# Facility Booking System - Backend
 
-## Team Members
-- Member 1: [Jing Peng] - [22301568] - *** Service
-- Member 2: [Eryk Marcinkowski] - [22374248] - *** Service
-- Member 3: [Darren Nugent] - [22365893] - *** Service
-- Member 4: [Kevin Burke] - [22355634] - *** Service
-- Member 5: [Michael Cronin] - [22336842] - *** Service
+Microservices backend for the University of Limerick facility booking system.
 
-## Project Overview
-A campus facility booking system for University of Limerick that allows 
-students and staff to reserve rooms, labs, sports facilities, and equipment.
+## Team Memebrs
 
-## Features
-- User authentication and role management
-- Facility browsing and search
-- Booking creation and management
-- Approval workflows
-- Email notifications
+- Member 1: [Jing Peng] - [22301568] - User Service
+- Member 2: [Eryk Marcinkowski] - [22374248] - Facility Service
+- Member 3: [Darren Nugent] - [22365893] - Booking Service
+- Member 4: [Kevin Burke] - [22355634] - Notification Service
+- Member 5: [Michael Cronin] - [22336842] - NLP Service
+- Member 6: [Muadh Muhsin Zibiri] - [22235302] - Approval Service
 
-## Technology Stack
-**Backend:** Spring Boot, PostgreSQL, RabbitMQ
-**Frontend:** React
-**Architecture:** Microservices
+## Architecture
 
-## Repository Structure
-- `/backend` - Microservices
-- `/frontend` - React application
-- `/docs` - Project documentation
+**Microservices:**
+- **user-service** (Port 8081) - Authentication & user management
+- **facility-service** (Port 8082) - Facility CRUD operations
+- **booking-service** (Port 8083) - Booking lifecycle management
+- **approval-service** (Port 8084) - Booking approval workflow
+- **notification-service** (Port 8085) - Event-driven notifications
+- **nlp-service** (Port 8000) - Natural language booking interface
+
+**Infrastructure:**
+- **api-gateway** (Port 8080) - API routing and authentication
+- PostgreSQL (Port 5432) - Persistent data storage
+- RabbitMQ (Port 5672) - Asynchronous messaging
+
+## Project Structure
+```
+├── user-service/          # User authentication (Jing Peng)
+├── facility-service/      # Facility management (Eryk Marcinkowski)
+├── booking-service/       # Booking operations (Darren Nugent)
+├── approval-service/      # Approval workflow (Muadh Muhsin Zibiri)
+├── notification-service/  # Notifications (Kevin Burke)
+├── nlp-service/          # NLP processing (Michael Cronin)
+├── api-gateway/          # API Gateway
+└── docs/                 # Architecture documentation
+    ├── architecture/     # System diagrams
+    ├── api-specs/       # OpenAPI specifications
+    └── requirements/    # Requirements documents
+```
