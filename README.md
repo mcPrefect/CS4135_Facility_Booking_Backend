@@ -4,7 +4,7 @@ Microservices backend for the University of Limerick facility booking system.
 
 ## Team Memebrs
 
-- Member 1: [Jing Peng] - [22301568] - User Service
+- Member 1: [Jing Peng] - [22301658] - User Service
 - Member 2: [Eryk Marcinkowski] - [22374248] - Facility Service
 - Member 3: [Darren Nugent] - [22365893] - Booking Service
 - Member 4: [Kevin Burke] - [22355634] - Notification Service
