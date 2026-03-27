@@ -6,10 +6,10 @@ Microservices backend for the University of Limerick facility booking system.
 
 - Member 1: [Jing Peng] - [22301658] - User Service
 - Member 2: [Eryk Marcinkowski] - [22374248] - Facility Service
-- Member 3: [Darren Nugent] - [22365893] - Booking Service
-- Member 4: [Kevin Burke] - [22355634] - Notification Service
+- Member 3: [Darren Nugent] - [22365893] - Booking & Approval Service
+- Member 4: [Kevin Burke] - [22355634] - Notification & Logging Service
 - Member 5: [Michael Cronin] - [22336842] - NLP Service
-- Member 6: [Muadh Muhsin Zibiri] - [22235302] - Approval Service
+- Member 6: [Muadh Muhsin Zibiri] - [22235302] - Frontend & API integration 
 
 ## Architecture
 
