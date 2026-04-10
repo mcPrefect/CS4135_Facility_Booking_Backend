@@ -8,9 +8,11 @@ import com.facilitybooking.userservice.service.UserService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 public class UserController {
@@ -37,4 +39,11 @@ public class UserController {
         loginResponseDTO.setToken(token);
         return ResponseEntity.ok(loginResponseDTO);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/test")
+    public ResponseEntity<String> adminTest() {
+        return ResponseEntity.ok("admin endpoint hit");
+    }
+
 }

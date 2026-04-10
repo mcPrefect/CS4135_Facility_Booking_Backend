@@ -33,7 +33,12 @@ public class UserService {
         // hash the password
         String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
         //User user = userMapper.toDomain(userDTO);
-        User user = new User(userDTO.getEmail(), hashedPassword);
+        User user;
+        if (userDTO.getEmail().equals("admin@example.com")) {
+            user = new User(userDTO.getEmail(), hashedPassword, "ADMIN");
+        } else {
+            user = new User(userDTO.getEmail(), hashedPassword, "USER");
+        }
 
         return userRepository.save(user);
     }
@@ -48,7 +53,7 @@ public class UserService {
         if (!passwordEncoder.matches(userDTO.getPassword(), userFromDb.getPassword())) {
             throw new RuntimeException("Wrong password");
         }
-        return jwtService.generateToken(userFromDb.getEmail(), userDTO.getRole());
+        return jwtService.generateToken(userFromDb.getEmail(), userFromDb.getRole());
 
 
 

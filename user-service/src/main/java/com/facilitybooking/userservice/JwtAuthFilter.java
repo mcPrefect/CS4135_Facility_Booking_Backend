@@ -26,9 +26,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null && !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             // if no JWT token, pass the request to the next controller/filter
             filterChain.doFilter(request, response);
             return;
@@ -39,8 +40,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try{
             String email = jwtService.extractEmail(token);
-            String role = jwtService.extractRole(email);
-
+            String role = jwtService.extractRole(token);
             // Spring security expects ROLE_ prefix
             // a matching authority for hasRole('xxx')
             String authority = role.startsWith("ROLE_") ? role : "ROLE_" + role;

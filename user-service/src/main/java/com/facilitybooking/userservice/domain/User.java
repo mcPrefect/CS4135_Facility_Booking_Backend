@@ -8,7 +8,7 @@ public class User {
     //private Long id;
     private String email;
     private String password;
-    //private String role;
+    private String role;
 
 //    public User(Long id, String email, String password, String role) {
 //        this.id = id;
@@ -17,9 +17,10 @@ public class User {
 //        this.role = role;
 //    }
 
-    public User(String email, String password) {
+    public User(String email, String password, String role) {
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 
 //    public String hashPassword(String password) {
