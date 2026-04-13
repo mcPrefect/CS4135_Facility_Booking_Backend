@@ -1,4 +1,4 @@
-package com.plassey.gateway;
+package com.facilitybooking.apigateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

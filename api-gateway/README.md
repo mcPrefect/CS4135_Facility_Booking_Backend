@@ -1,5 +1,7 @@
 # API Gateway (Spring Cloud Gateway)
 
+Java package: `com.facilitybooking.apigateway` (aligned with other services under `com.facilitybooking.*`).
+
 Single entry point for the Plassey Planner SPA and external clients. Forwards `/api/v1/**` to downstream services using ports from the team README.
 
 ## Run locally
