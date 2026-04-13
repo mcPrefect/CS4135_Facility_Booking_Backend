@@ -1,0 +1,106 @@
+spring:
+  application:
+    name: facility-service
+  config:
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}"
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:facilitydb;DB_CLOSE_DELAY=-1}
+    username: ${DB_USER:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: ${DB_DIALECT:org.hibernate.dialect.H2Dialect}
+        default_schema: public
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+    connection-timeout: 5000
+
+server:
+  port: ${SERVER_PORT:8082}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+
+# Resilience4j configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      bookingService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      facilityPublisher:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 60
+        waitDurationInOpenState: 5s
+  timelimiter:
+    instances:
+      bookingService:
+        timeoutDuration: 2s
+  retry:
+    instances:
+      facilityPublisher:
+        maxAttempts: 3
+        waitDuration: 500ms
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+
+# JWT secret (override via Config Server in production)
+app:
+  jwt:
+    secret: ${JWT_SECRET:plassey-planner-secret-key-for-hs256-minimum-32-bytes}
+    expiration-ms: 3600000
+
+# RabbitMQ exchange/queue names
+rabbitmq:
+  exchange:
+    facility: facility.events
+  routing-keys:
+    created: facility.created
+    updated: facility.updated
+    status-changed: facility.status.changed
+    maintenance-scheduled: facility.maintenance.scheduled
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+    rabbit:
+      enabled: false
+
+logging:
+  level:
+    com.plassey.facilityservice: DEBUG
+    org.springframework.amqp: INFO
