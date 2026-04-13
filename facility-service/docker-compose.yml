@@ -1,0 +1,129 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Plassey Planner – Facility Service Stack
+# Run:  docker-compose up -d
+# Stop: docker-compose down -v
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Infrastructure ───────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: plassey-postgres
+    environment:
+      POSTGRES_DB: facilitydb
+      POSTGRES_USER: plassey
+      POSTGRES_PASSWORD: plassey_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U plassey -d facilitydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: plassey-rabbitmq
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI  (http://localhost:15672 guest/guest)
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── Service Discovery: Eureka Server (built locally) ─────────────────────
+  # NOTE: old 'springcloud/eureka' image is broken on containerd v2.1+
+  #       we build from source in ./eureka-server/ instead
+
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    container_name: plassey-eureka
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8761/actuator/health || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 8
+      start_period: 60s
+
+  # ── Centralised Config Server (built locally) ─────────────────────────────
+  # NOTE: old 'hyness/spring-cloud-config-server' image may also be stale
+  #       we build from source in ./config-server/ instead
+
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    container_name: plassey-config
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config:/config:ro
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8888/actuator/health || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── Facility Service ─────────────────────────────────────────────────────
+
+  facility-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: plassey-facility
+    ports:
+      - "8082:8082"
+    environment:
+      SERVER_PORT: 8082
+      DB_URL: jdbc:postgresql://postgres:5432/facilitydb
+      DB_USER: plassey
+      DB_PASSWORD: plassey_secret
+      DB_DRIVER: org.postgresql.Driver
+      DB_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+      EUREKA_URL: http://eureka-server:8761/eureka/
+      CONFIG_SERVER_URL: http://config-server:8888
+      JWT_SECRET: plassey-planner-secret-key-for-hs256-minimum-32-bytes
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/actuator/health || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  postgres-data:
+  rabbitmq-data:
