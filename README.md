@@ -31,10 +31,10 @@ Microservices backend for the University of Limerick facility booking system.
 ├── user-service/          # User authentication (Jing Peng)
 ├── facility-service/      # Facility management (Eryk Marcinkowski)
 ├── booking-service/       # Booking operations (Darren Nugent)
-├── approval-service/      # Approval workflow (Muadh Muhsin Zibiri)
+├── approval-service/      # Approval workflow 
 ├── notification-service/  # Notifications (Kevin Burke)
 ├── nlp-service/          # NLP processing (Michael Cronin)
-├── api-gateway/          # API Gateway
+├── api-gateway/          # API Gateway (Muadh Muhsin Zibiri)
 └── docs/                 # Architecture documentation
     ├── architecture/     # System diagrams
     ├── api-specs/       # OpenAPI specifications
