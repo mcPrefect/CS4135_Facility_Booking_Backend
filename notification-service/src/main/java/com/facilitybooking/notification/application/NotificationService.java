@@ -2,9 +2,7 @@ package com.facilitybooking.notification.application;
 
 import com.facilitybooking.notification.domain.Notification;
 import com.facilitybooking.notification.domain.NotificationStatus;
-import com.facilitybooking.notification.infrastructure.email.EmailDispatchService;
 import com.facilitybooking.notification.repository.NotificationRepository;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,17 +16,17 @@ public class NotificationService {
 
     private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
-    private final NotificationRepository notificationRepository;
-    private final EmailDispatchService   emailDispatchService;
+    private final NotificationRepository     notificationRepository;
+    private final NotificationDispatchService dispatchService;
 
-    public NotificationService(NotificationRepository repo, EmailDispatchService emailDispatchService) {
+    public NotificationService(NotificationRepository repo, NotificationDispatchService dispatchService) {
         this.notificationRepository = repo;
-        this.emailDispatchService   = emailDispatchService;
+        this.dispatchService        = dispatchService;
     }
 
     @Transactional
     public void createAndDispatch(Notification notification) {
-        // Idempotency check: skip if already exists for same recipient + type
+        // Idempotency check: skip if already SENT for same recipient + type
         boolean duplicate = notificationRepository.existsByRecipientIdAndTypeAndStatus(
                 notification.getRecipientId(), notification.getType(), NotificationStatus.SENT);
         if (duplicate) {
@@ -38,27 +36,8 @@ public class NotificationService {
         }
 
         notificationRepository.save(notification);
-        dispatch(notification);
-    }
-
-    @CircuitBreaker(name = "emailDispatch", fallbackMethod = "fallbackToInApp")
-    void dispatch(Notification notification) {
-        switch (notification.getChannel()) {
-            case EMAIL -> emailDispatchService.send(notification);
-            case IN_APP -> {
-                notification.markSent();
-                notificationRepository.save(notification);
-                log.info("IN_APP notification marked SENT: notificationId={}", notification.getNotificationId());
-            }
-        }
-    }
-
-    // Fallback: downgrade to IN_APP when email circuit is open
-    void fallbackToInApp(Notification notification, Throwable ex) {
-        log.warn("emailDispatch circuit open – falling back to IN_APP for notificationId={}. Reason: {}",
-                notification.getNotificationId(), ex.getMessage());
-        notification.markSent(); // persist as sent via IN_APP
-        notificationRepository.save(notification);
+        // Call through separate bean so @CircuitBreaker AOP proxy is active
+        dispatchService.dispatch(notification);
     }
 
     @Transactional(readOnly = true)
