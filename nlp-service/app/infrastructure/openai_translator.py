@@ -9,8 +9,10 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from datetime import datetime, timezone
 
+import pybreaker
 from openai import AsyncOpenAI
 
 from app.domain.value_objects import (
@@ -23,6 +25,15 @@ from app.domain.value_objects import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Circuit breaker: opens after 3 consecutive OpenAI failures,
+# resets after 30 seconds. Protects the service from cascading
+# failures when the external OpenAI API is unavailable.
+openai_breaker = pybreaker.CircuitBreaker(
+    fail_max=3,
+    reset_timeout=30,
+    name="openai_circuit_breaker",
+)
 
 SYSTEM_PROMPT = """You are a university facility booking assistant. Parse the user's natural language input and extract booking intent and entities.
 
@@ -41,7 +52,7 @@ Respond ONLY with valid JSON in this exact format:
 Rules:
 - Convert relative dates (e.g., "Friday", "tomorrow") to absolute ISO dates based on today's date.
 - Convert times to 24-hour format (e.g., "3pm" -> "15:00").
-- Normalise facility names to title case (e.g., "sports hall" -> "Sports Hall").
+- Normalise facility names to title case (e.g., "sports hall" -> "Sports Hall", "cs3004Bb" -> "CS3004B").
 - Only include entities that are explicitly mentioned or clearly implied.
 - If the intent is unclear, set confidence below 0.5.
 - Today's date is: {today}
@@ -51,6 +62,7 @@ Rules:
 class OpenAIResponseTranslator:
     """
     Anti-Corruption Layer: translates OpenAI completions into domain value objects.
+    Includes a circuit breaker to handle OpenAI API unavailability gracefully.
     """
 
     def __init__(self, api_key: str, model: str = "gpt-4o-mini"):
@@ -60,13 +72,16 @@ class OpenAIResponseTranslator:
     async def interpret(self, raw_text: str) -> Resolution:
         """
         Send raw text to OpenAI and translate the response into a Resolution.
+        The circuit breaker will open if OpenAI fails 3 consecutive times,
+        immediately rejecting requests until the timeout resets.
 
         Raises InterpretationException if the response cannot be cleanly translated.
         """
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         try:
-            response = await self.client.chat.completions.create(
+            response = await openai_breaker.call_async(
+                self.client.chat.completions.create,
                 model=self.model,
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT.format(today=today)},
@@ -81,6 +96,11 @@ class OpenAIResponseTranslator:
 
             return self._translate(raw_content)
 
+        except pybreaker.CircuitBreakerError:
+            logger.error("Circuit breaker OPEN — OpenAI API unavailable")
+            raise InterpretationException(
+                "OpenAI service unavailable - circuit breaker open"
+            )
         except InterpretationException:
             raise
         except Exception as e:
@@ -89,8 +109,6 @@ class OpenAIResponseTranslator:
 
     def _translate(self, raw_content: str) -> Resolution:
         """Parse and validate the OpenAI JSON response into domain objects."""
-        # Strip markdown code fences if present
-        import re
         content = re.sub(r"^```(?:json)?\s*", "", raw_content.strip())
         content = re.sub(r"\s*```$", "", content).strip()
 
