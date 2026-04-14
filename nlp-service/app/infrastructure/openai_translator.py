@@ -27,16 +27,16 @@ logger = logging.getLogger(__name__)
 SYSTEM_PROMPT = """You are a university facility booking assistant. Parse the user's natural language input and extract booking intent and entities.
 
 Respond ONLY with valid JSON in this exact format:
-{
+{{
   "intent": "CREATE_BOOKING" | "CHECK_AVAILABILITY" | "CANCEL_BOOKING" | "QUERY_STATUS",
   "confidence": <float between 0.0 and 1.0>,
   "entities": [
-    {"type": "FACILITY", "value": "<normalised facility name>", "raw": "<original text>"},
-    {"type": "DATE", "value": "<YYYY-MM-DD>", "raw": "<original text>"},
-    {"type": "TIME", "value": "<HH:MM in 24h format>", "raw": "<original text>"},
-    {"type": "DURATION", "value": "<duration in minutes>", "raw": "<original text>"}
+    {{"type": "FACILITY", "value": "<normalised facility name>", "raw": "<original text>"}},
+    {{"type": "DATE", "value": "<YYYY-MM-DD>", "raw": "<original text>"}},
+    {{"type": "TIME", "value": "<HH:MM in 24h format>", "raw": "<original text>"}},
+    {{"type": "DURATION", "value": "<duration in minutes>", "raw": "<original text>"}}
   ]
-}
+}}
 
 Rules:
 - Convert relative dates (e.g., "Friday", "tomorrow") to absolute ISO dates based on today's date.
@@ -77,7 +77,7 @@ class OpenAIResponseTranslator:
             )
 
             raw_content = response.choices[0].message.content.strip()
-            logger.info(f"OpenAI raw response: {raw_content}")
+            logger.info(f"OpenAI raw response: {raw_content!r}")
 
             return self._translate(raw_content)
 
@@ -90,12 +90,9 @@ class OpenAIResponseTranslator:
     def _translate(self, raw_content: str) -> Resolution:
         """Parse and validate the OpenAI JSON response into domain objects."""
         # Strip markdown code fences if present
-        content = raw_content
-        if content.startswith("```"):
-            content = content.split("\n", 1)[-1]
-            if content.endswith("```"):
-                content = content[:-3]
-            content = content.strip()
+        import re
+        content = re.sub(r"^```(?:json)?\s*", "", raw_content.strip())
+        content = re.sub(r"\s*```$", "", content).strip()
 
         try:
             data = json.loads(content)
