@@ -10,30 +10,46 @@ from __future__ import annotations
 import json
 import logging
 import re
+import time
 from datetime import datetime, timezone
 
-import pybreaker
 from openai import AsyncOpenAI
 
 from app.domain.value_objects import (
-    Intent,
-    IntentType,
-    Confidence,
-    ExtractedEntity,
-    EntityType,
-    Resolution,
+    Intent, IntentType, Confidence, ExtractedEntity, EntityType, Resolution,
 )
 
 logger = logging.getLogger(__name__)
 
-# Circuit breaker: opens after 3 consecutive OpenAI failures,
-# resets after 30 seconds. Protects the service from cascading
-# failures when the external OpenAI API is unavailable.
-openai_breaker = pybreaker.CircuitBreaker(
-    fail_max=3,
-    reset_timeout=30,
-    name="openai_circuit_breaker",
-)
+class CircuitBreaker:
+    """Simple circuit breaker for the OpenAI API boundary."""
+    def __init__(self, fail_max: int = 3, reset_timeout: int = 30):
+        self.fail_max = fail_max
+        self.reset_timeout = reset_timeout
+        self._failures = 0
+        self._opened_at = None
+        self._state = "closed"
+
+    @property
+    def state(self):
+        if self._state == "open":
+            if time.time() - self._opened_at >= self.reset_timeout:
+                self._state = "half-open"
+        return self._state
+
+    def record_success(self):
+        self._failures = 0
+        self._state = "closed"
+        self._opened_at = None
+
+    def record_failure(self):
+        self._failures += 1
+        if self._failures >= self.fail_max:
+            self._state = "open"
+            self._opened_at = time.time()
+            logger.warning(f"Circuit breaker OPEN after {self._failures} failures")
+
+openai_breaker = CircuitBreaker(fail_max=3, reset_timeout=30)
 
 SYSTEM_PROMPT = """You are a university facility booking assistant. Parse the user's natural language input and extract booking intent and entities.
 
@@ -70,18 +86,15 @@ class OpenAIResponseTranslator:
         self.model = model
 
     async def interpret(self, raw_text: str) -> Resolution:
-        """
-        Send raw text to OpenAI and translate the response into a Resolution.
-        The circuit breaker will open if OpenAI fails 3 consecutive times,
-        immediately rejecting requests until the timeout resets.
-
-        Raises InterpretationException if the response cannot be cleanly translated.
-        """
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
+        if openai_breaker.state == "open":
+            raise InterpretationException(
+                "OpenAI service unavailable - circuit breaker open"
+            )
+
         try:
-            response = await openai_breaker.call_async(
-                self.client.chat.completions.create,
+            response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT.format(today=today)},
@@ -90,20 +103,17 @@ class OpenAIResponseTranslator:
                 temperature=0.1,
                 max_tokens=500,
             )
+            openai_breaker.record_success()
 
             raw_content = response.choices[0].message.content.strip()
             logger.info(f"OpenAI raw response: {raw_content!r}")
 
             return self._translate(raw_content)
 
-        except pybreaker.CircuitBreakerError:
-            logger.error("Circuit breaker OPEN — OpenAI API unavailable")
-            raise InterpretationException(
-                "OpenAI service unavailable - circuit breaker open"
-            )
         except InterpretationException:
             raise
         except Exception as e:
+            openai_breaker.record_failure()
             logger.error(f"OpenAI API call failed: {e}")
             raise InterpretationException(f"OpenAI API error: {str(e)}")
 
