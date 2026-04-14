@@ -1,8 +1,8 @@
-package com.plassey.notification.infrastructure.messaging;
+package com.facilitybooking.notification.infrastructure.messaging;
 
-import com.plassey.notification.domain.Channel;
-import com.plassey.notification.domain.Notification;
-import com.plassey.notification.domain.NotificationType;
+import com.facilitybooking.notification.domain.Channel;
+import com.facilitybooking.notification.domain.Notification;
+import com.facilitybooking.notification.domain.NotificationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

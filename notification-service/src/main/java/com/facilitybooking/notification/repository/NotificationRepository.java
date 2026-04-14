@@ -1,8 +1,8 @@
-package com.plassey.notification.repository;
+package com.facilitybooking.notification.repository;
 
-import com.plassey.notification.domain.Notification;
-import com.plassey.notification.domain.NotificationStatus;
-import com.plassey.notification.domain.NotificationType;
+import com.facilitybooking.notification.domain.Notification;
+import com.facilitybooking.notification.domain.NotificationStatus;
+import com.facilitybooking.notification.domain.NotificationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;

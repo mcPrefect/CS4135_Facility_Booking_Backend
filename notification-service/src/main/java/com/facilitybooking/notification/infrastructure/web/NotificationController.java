@@ -1,7 +1,7 @@
-package com.plassey.notification.infrastructure.web;
+package com.facilitybooking.notification.infrastructure.web;
 
-import com.plassey.notification.application.NotificationService;
-import com.plassey.notification.domain.Notification;
+import com.facilitybooking.notification.application.NotificationService;
+import com.facilitybooking.notification.domain.Notification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/notifications")
+@RequestMapping("/api/v1/notifications")
 public class NotificationController {
 
     private final NotificationService notificationService;

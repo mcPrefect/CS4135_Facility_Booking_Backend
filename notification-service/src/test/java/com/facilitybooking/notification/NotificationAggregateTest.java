@@ -1,8 +1,8 @@
-package com.plassey.notification;
+package com.facilitybooking.notification;
 
-import com.plassey.notification.domain.*;
-import com.plassey.notification.infrastructure.messaging.BookingEventDto;
-import com.plassey.notification.infrastructure.messaging.BookingEventTranslator;
+import com.facilitybooking.notification.domain.*;
+import com.facilitybooking.notification.infrastructure.messaging.BookingEventDto;
+import com.facilitybooking.notification.infrastructure.messaging.BookingEventTranslator;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

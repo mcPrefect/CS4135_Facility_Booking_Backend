@@ -1,4 +1,4 @@
-package com.plassey.notification;
+package com.facilitybooking.notification;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

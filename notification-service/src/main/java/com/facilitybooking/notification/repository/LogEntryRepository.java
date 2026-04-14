@@ -1,7 +1,7 @@
-package com.plassey.notification.repository;
+package com.facilitybooking.notification.repository;
 
-import com.plassey.notification.domain.LogEntry;
-import com.plassey.notification.domain.LogLevel;
+import com.facilitybooking.notification.domain.LogEntry;
+import com.facilitybooking.notification.domain.LogLevel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

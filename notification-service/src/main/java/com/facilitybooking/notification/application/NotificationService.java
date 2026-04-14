@@ -1,9 +1,9 @@
-package com.plassey.notification.application;
+package com.facilitybooking.notification.application;
 
-import com.plassey.notification.domain.Notification;
-import com.plassey.notification.domain.NotificationStatus;
-import com.plassey.notification.infrastructure.email.EmailDispatchService;
-import com.plassey.notification.repository.NotificationRepository;
+import com.facilitybooking.notification.domain.Notification;
+import com.facilitybooking.notification.domain.NotificationStatus;
+import com.facilitybooking.notification.infrastructure.email.EmailDispatchService;
+import com.facilitybooking.notification.repository.NotificationRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

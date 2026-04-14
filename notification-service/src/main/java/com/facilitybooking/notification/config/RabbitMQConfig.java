@@ -1,4 +1,4 @@
-package com.plassey.notification.config;
+package com.facilitybooking.notification.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
