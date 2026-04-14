@@ -32,9 +32,11 @@ settings = Settings.from_env()
 _db_pool = None
 _publisher = None
 
+import py_eureka_client.eureka_client as eureka_client
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info(f"Starting nlp-service ({settings.environment})")
     """Manage application startup and shutdown."""
     global _db_pool, _publisher
 
@@ -70,8 +72,22 @@ async def lifespan(app: FastAPI):
     set_service(service)
 
     logger.info(f"{settings.service_name} ready on port {settings.service_port}")
+    
+    # Register with Eureka
+    try:
+        await eureka_client.init_async(
+            eureka_server=settings.eureka_url,
+            app_name="nlp-service",
+            instance_port=8000,
+        )
+        logger.info("Registered with Eureka")
+    except Exception as e:
+        logger.warning(f"Eureka registration failed (service will still start): {e}")
 
     yield
+    
+    await eureka_client.stop_async()
+    logger.info("Deregistered from Eureka")
 
     # Shutdown
     logger.info("Shutting down...")

@@ -32,11 +32,14 @@ class Settings:
 
     # NLP
     min_confidence_threshold: float = 0.6
+    
+    eureka_url: str = "http://eureka-server:8761/eureka"
 
     @classmethod
     def from_env(cls) -> Settings:
         """Load settings from environment variables."""
         return cls(
+            eureka_url= os.getenv("EUREKA_URL", "http://eureka-server:8761/eureka"),
             service_name=os.getenv("SERVICE_NAME", "nlp-service"),
             service_port=int(os.getenv("SERVICE_PORT", "8000")),
             environment=os.getenv("ENVIRONMENT", "development"),

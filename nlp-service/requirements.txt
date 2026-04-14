@@ -5,3 +5,4 @@ pydantic
 fastapi
 pytest
 uvicorn
+py-eureka-client
