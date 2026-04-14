@@ -1,8 +1,8 @@
-package com.plassey.notification.infrastructure.web;
+package com.facilitybooking.notification.infrastructure.web;
 
-import com.plassey.notification.application.LogEntryService;
-import com.plassey.notification.domain.LogEntry;
-import com.plassey.notification.domain.LogLevel;
+import com.facilitybooking.notification.application.LogEntryService;
+import com.facilitybooking.notification.domain.LogEntry;
+import com.facilitybooking.notification.domain.LogLevel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/logs")
+@RequestMapping("/api/v1/logs")
 public class LogController {
 
     private final LogEntryService logEntryService;

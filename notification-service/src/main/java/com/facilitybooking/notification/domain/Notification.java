@@ -1,4 +1,4 @@
-package com.plassey.notification.domain;
+package com.facilitybooking.notification.domain;
 
 import jakarta.persistence.*;
 import lombok.*;

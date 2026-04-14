@@ -1,7 +1,7 @@
-package com.plassey.notification.infrastructure.email;
+package com.facilitybooking.notification.infrastructure.email;
 
-import com.plassey.notification.domain.Notification;
-import com.plassey.notification.repository.NotificationRepository;
+import com.facilitybooking.notification.domain.Notification;
+import com.facilitybooking.notification.repository.NotificationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;

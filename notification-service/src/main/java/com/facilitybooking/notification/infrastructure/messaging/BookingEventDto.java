@@ -1,4 +1,4 @@
-package com.plassey.notification.infrastructure.messaging;
+package com.facilitybooking.notification.infrastructure.messaging;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

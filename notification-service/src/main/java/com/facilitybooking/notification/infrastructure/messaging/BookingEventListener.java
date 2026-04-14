@@ -1,7 +1,7 @@
-package com.plassey.notification.infrastructure.messaging;
+package com.facilitybooking.notification.infrastructure.messaging;
 
-import com.plassey.notification.application.NotificationService;
-import com.plassey.notification.domain.Notification;
+import com.facilitybooking.notification.application.NotificationService;
+import com.facilitybooking.notification.domain.Notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
