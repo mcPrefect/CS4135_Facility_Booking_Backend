@@ -3,3 +3,4 @@ asyncpg
 aio_pika
 pydantic
 fastapi
+pytest
