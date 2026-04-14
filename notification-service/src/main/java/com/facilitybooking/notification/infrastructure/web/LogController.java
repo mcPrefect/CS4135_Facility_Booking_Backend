@@ -22,8 +22,20 @@ public class LogController {
     }
 
     @PostMapping
-    public ResponseEntity<LogEntry> ingestLog(@RequestBody Map<String, String> body) {
-        LogLevel level = LogLevel.valueOf(body.getOrDefault("level", "INFO"));
+    public ResponseEntity<?> ingestLog(@RequestBody Map<String, String> body) {
+        LogLevel level;
+        try {
+            level = LogLevel.valueOf(body.getOrDefault("level", "INFO").toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Invalid log level. Valid values: INFO, WARN, ERROR"));
+        }
+
+        if (body.get("serviceName") == null || body.get("message") == null) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "serviceName and message are required fields"));
+        }
+
         LogEntry entry = logEntryService.record(
                 body.get("serviceName"),
                 level,
@@ -34,12 +46,23 @@ public class LogController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<LogEntry>> getLogs(
+    public ResponseEntity<?> getLogs(
             @RequestParam(required = false) String serviceName,
             @RequestParam(required = false) String level,
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "50") int size) {
-        LogLevel logLevel = level != null ? LogLevel.valueOf(level) : null;
-        return ResponseEntity.ok(logEntryService.query(serviceName, logLevel, PageRequest.of(page, size)));
+
+        LogLevel logLevel = null;
+        if (level != null) {
+            try {
+                logLevel = LogLevel.valueOf(level.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Invalid log level. Valid values: INFO, WARN, ERROR"));
+            }
+        }
+
+        Page<LogEntry> results = logEntryService.query(serviceName, logLevel, PageRequest.of(page, size));
+        return ResponseEntity.ok(results);
     }
 }
