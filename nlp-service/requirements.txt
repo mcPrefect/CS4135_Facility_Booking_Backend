@@ -5,4 +5,3 @@ pydantic
 fastapi
 pytest
 uvicorn
-pybreaker
