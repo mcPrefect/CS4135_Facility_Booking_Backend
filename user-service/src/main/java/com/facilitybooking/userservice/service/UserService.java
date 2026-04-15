@@ -5,9 +5,7 @@ import com.facilitybooking.userservice.domain.valueobject.EmailAddress;
 import com.facilitybooking.userservice.domain.valueobject.Role;
 import com.facilitybooking.userservice.dto.LoginRequestDTO;
 import com.facilitybooking.userservice.dto.RegisterRequestDTO;
-import com.facilitybooking.userservice.dto.RegisterResponseDTO;
 import com.facilitybooking.userservice.exception.InvalidCredentialsException;
-import com.facilitybooking.userservice.mapper.UserMapper;
 import com.facilitybooking.userservice.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,6 @@ public class UserService {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
     }
-    //public User getUserById(@RequestBody User user) {}
 
 
 
