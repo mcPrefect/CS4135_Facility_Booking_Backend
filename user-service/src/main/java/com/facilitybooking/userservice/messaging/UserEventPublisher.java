@@ -23,7 +23,7 @@ public class UserEventPublisher {
     @Value("${rabbitmq.exchange}")
     private String exchange;
 
-    @Value("${rabbitmq.routing.user-regitered}")
+    @Value("${rabbitmq.routing.user-registered}")
     private String routingKey;
 
     public void publishUserRegistered(User user) {

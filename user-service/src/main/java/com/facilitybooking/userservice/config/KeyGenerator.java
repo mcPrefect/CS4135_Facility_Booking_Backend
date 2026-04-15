@@ -1,7 +1,5 @@
-package com.facilitybooking.userservice;
+package com.facilitybooking.userservice.config;
 
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 

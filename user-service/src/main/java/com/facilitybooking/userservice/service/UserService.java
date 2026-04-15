@@ -19,12 +19,11 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
-    private final UserMapper userMapper;
-    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository, JwtService jwtService, UserMapper userMapper) {
+
+    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository, JwtService jwtService) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.jwtService = jwtService;
-        this.userMapper = userMapper;
     }
     //public User getUserById(@RequestBody User user) {}
 
@@ -37,8 +36,6 @@ public class UserService {
         }
         // hash the password
         String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
-        //User user = userMapper.toDomain(userDTO);
-        // TODO: if user exist
         EmailAddress emailAddress = new EmailAddress(userDTO.getEmail());
         User userFromDb = userRepository.findByEmail(emailAddress);
         if (userFromDb != null){

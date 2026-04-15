@@ -1,4 +1,4 @@
-package com.facilitybooking.userservice;
+package com.facilitybooking.userservice.config;
 
 import com.facilitybooking.userservice.service.JwtService;
 import jakarta.servlet.FilterChain;
