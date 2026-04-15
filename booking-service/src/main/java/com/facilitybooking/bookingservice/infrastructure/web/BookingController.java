@@ -39,10 +39,13 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<BookingResponse> createBooking(
             @Valid @RequestBody BookingRequest request,
-            @AuthenticationPrincipal UserDetails principal) {
+            @AuthenticationPrincipal UserDetails principal,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
         UUID userId = UUID.fromString(principal.getUsername());
-        Booking booking = bookingService.createBooking(userId, request);
+        String jwtToken = authHeader != null && authHeader.startsWith("Bearer ")
+                ? authHeader.substring(7) : null;
+        Booking booking = bookingService.createBooking(userId, request, jwtToken);
         return ResponseEntity.status(HttpStatus.CREATED).body(BookingResponse.from(booking));
     }
 

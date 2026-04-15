@@ -34,7 +34,12 @@ rabbitmq:
     approval-events: booking.approval.events.queue
     dlq: booking.events.dlq
 
-resilience4j:
+facility:
+  service:
+    url: http://plassey-facility:8082
+
+jwt:
+  secret: plassey-planner-secret-key-for-hs256-minimum-32-bytes
   circuitbreaker:
     instances:
       facilityService:

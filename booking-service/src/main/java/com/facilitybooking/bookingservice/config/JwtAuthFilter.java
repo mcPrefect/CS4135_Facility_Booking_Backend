@@ -29,7 +29,7 @@ import java.util.List;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    @Value("${jwt.secret:plassey-planner-secret-key-for-development-only}")
+    @Value("${jwt.secret:plassey-planner-secret-key-for-hs256-minimum-32-bytes}")
     private String jwtSecret;
 
     @Override

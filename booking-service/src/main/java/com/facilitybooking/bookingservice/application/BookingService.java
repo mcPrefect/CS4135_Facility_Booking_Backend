@@ -5,7 +5,7 @@ import com.facilitybooking.bookingservice.domain.BookingDomainEvent;
 import com.facilitybooking.bookingservice.domain.BookingStatus;
 import com.facilitybooking.bookingservice.domain.TimeSlot;
 import com.facilitybooking.bookingservice.infrastructure.messaging.BookingEventPublisher;
-import com.facilitybooking.bookingservice.infrastructure.persistence.FacilityAvailabilityResponse;
+import com.facilitybooking.bookingservice.infrastructure.persistence.FacilityExistsResponse;
 import com.facilitybooking.bookingservice.infrastructure.persistence.FacilityServiceClient;
 import com.facilitybooking.bookingservice.infrastructure.web.BookingRequest;
 import com.facilitybooking.bookingservice.repository.BookingRepository;
@@ -35,18 +35,19 @@ public class BookingService {
     }
 
     @Transactional
-    public Booking createBooking(UUID userId, BookingRequest request) {
+    public Booking createBooking(UUID userId, BookingRequest request, String jwtToken) {
         TimeSlot timeSlot = TimeSlot.of(request.getStartTime(), request.getEndTime());
 
-        // Check availability with Facility Service (circuit breaker applied in client)
-        FacilityAvailabilityResponse availability = facilityServiceClient
-                .checkAvailability(request.getFacilityId(), request.getStartTime(), request.getEndTime());
+        // Check facility exists and is bookable with Facility Service (circuit breaker in client)
+        FacilityExistsResponse facility = facilityServiceClient
+                .checkFacilityBookable(request.getFacilityId(), jwtToken);
 
-        if (!availability.isAvailable()) {
+        if (!facility.isExists()) {
+            throw new BookingConflictException("Facility does not exist: " + request.getFacilityId());
+        }
+        if (!facility.isBookable()) {
             throw new BookingConflictException(
-                    availability.getMessage() != null
-                    ? availability.getMessage()
-                    : "Facility is not available for the requested time slot.");
+                    facility.getReason() != null ? facility.getReason() : "Facility is not available for booking.");
         }
 
         // Local conflict check (double safety, FR-05)
@@ -57,7 +58,7 @@ public class BookingService {
         }
 
         Booking booking = Booking.create(userId, request.getFacilityId(),
-                availability.getFacilityName(), timeSlot, request.getPurpose());
+                facility.getName(), timeSlot, request.getPurpose());
 
         bookingRepository.save(booking);
         publishEvents(booking);
