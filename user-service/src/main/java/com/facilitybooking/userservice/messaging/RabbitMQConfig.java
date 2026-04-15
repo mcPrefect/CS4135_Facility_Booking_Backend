@@ -26,19 +26,5 @@ public class RabbitMQConfig {
                 .with("user.registered");
     }
 
-    @Bean
-    public ApplicationRunner declareRabbitTopology(
-            AmqpAdmin amqpAdmin,
-            DirectExchange userExchange,
-            Queue userRegisteredQueue,
-            Binding userRegisteredBinding
-    ) {
-        return args -> {
-            System.out.println("Declaring RabbitMQ topology...");
-            amqpAdmin.declareExchange(userExchange);
-            amqpAdmin.declareQueue(userRegisteredQueue);
-            amqpAdmin.declareBinding(userRegisteredBinding);
-            System.out.println("RabbitMQ topology declared.");
-        };
-    }
+
 }
