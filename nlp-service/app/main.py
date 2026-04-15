@@ -80,7 +80,7 @@ async def lifespan(app: FastAPI):
 
     logger.info(f"{settings.service_name} ready on port {settings.service_port}")
     
-    # Register with Eureka
+    # During startup  
     try:
         await eureka_client.init_async(
             eureka_server=settings.eureka_url,
@@ -92,7 +92,7 @@ async def lifespan(app: FastAPI):
         logger.warning(f"Eureka registration failed (service will still start): {e}")
 
     yield
-    
+    # During shutdown 
     await eureka_client.stop_async()
     logger.info("Deregistered from Eureka")
 

@@ -26,5 +26,9 @@ class FacilityServiceClient:
                             return facilities[0]["facilityId"]
             except Exception as e:
                 logger.warning(f"Facility lookup attempt {attempt + 1} failed: {e}")
-                continue  # ← add this line
+                continue  
         return None
+    
+    
+    
+    

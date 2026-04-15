@@ -13,26 +13,14 @@ from dataclasses import dataclass
 
 @dataclass
 class Settings:
-    """Application settings loaded from environment variables."""
-
-    # Service
     service_name: str = "nlp-service"
     service_port: int = 8000
     environment: str = "development"
-
-    # OpenAI
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
-
-    # PostgreSQL
     database_url: str = "postgresql://postgres:postgres@localhost:5432/nlp_service"
-
-    # RabbitMQ
     rabbitmq_url: str = "amqp://guest:guest@localhost:5672/"
-
-    # NLP
     min_confidence_threshold: float = 0.6
-    
     eureka_url: str = "http://eureka-server:8761/eureka"
     facility_service_url: str = "http://plassey-facility:8082"
 
@@ -58,3 +46,5 @@ class Settings:
                 os.getenv("MIN_CONFIDENCE_THRESHOLD", "0.6")
             ),
         )
+        
+        
