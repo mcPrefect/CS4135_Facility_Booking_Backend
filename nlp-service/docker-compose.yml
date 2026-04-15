@@ -1,4 +1,4 @@
-version: "3.8"
+# version: "3.8"
 
 services:
   nlp-service:
@@ -16,6 +16,8 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@nlp-db:5432/nlp_service
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - MIN_CONFIDENCE_THRESHOLD=0.6
+      - FACILITY_SERVICE_URL=http://plassey-facility:8082
+      - JWT_SECRET=plassey-planner-secret-key-for-hs256-minimum-32-bytes
     depends_on:
       nlp-db:
         condition: service_healthy

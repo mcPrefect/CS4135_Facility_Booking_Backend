@@ -61,16 +61,27 @@ class QueryResponse(BaseModel):
 async def interpret_query(
     request: QueryRequest,
     x_user_id: str = Header(default="anonymous", alias="X-User-Id"),
+    authorization: Optional[str] = Header(None),
 ):
     """
     Interpret a natural language booking query.
 
     The X-User-Id header is set by the API Gateway after JWT validation.
+    The Authorization header is forwarded to the Facility Service for name resolution.
     """
     if _service is None:
         raise HTTPException(status_code=503, detail="Service not initialised")
 
-    query = await _service.interpret(user_id=x_user_id, raw_text=request.rawText)
+    # Extract JWT token to forward to Facility Service for name resolution
+    jwt_token = None
+    if authorization and authorization.startswith("Bearer "):
+        jwt_token = authorization.split(" ", 1)[1]
+
+    query = await _service.interpret(
+        user_id=x_user_id,
+        raw_text=request.rawText,
+        jwt_token=jwt_token,
+    )
 
     response = QueryResponse(
         queryId=query.query_id,
