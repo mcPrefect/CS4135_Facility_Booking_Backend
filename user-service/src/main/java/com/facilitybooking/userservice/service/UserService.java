@@ -1,8 +1,12 @@
 package com.facilitybooking.userservice.service;
 
-
-import com.facilitybooking.userservice.domain.User;
+import com.facilitybooking.userservice.domain.entity.User;
+import com.facilitybooking.userservice.domain.valueobject.EmailAddress;
+import com.facilitybooking.userservice.domain.valueobject.Role;
 import com.facilitybooking.userservice.dto.LoginRequestDTO;
+import com.facilitybooking.userservice.dto.RegisterRequestDTO;
+import com.facilitybooking.userservice.dto.RegisterResponseDTO;
+import com.facilitybooking.userservice.exception.InvalidCredentialsException;
 import com.facilitybooking.userservice.mapper.UserMapper;
 import com.facilitybooking.userservice.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,36 +30,36 @@ public class UserService {
 
 
 
-    public User register(LoginRequestDTO userDTO){
-        // TODO query user by username cause username is unique
-        // TODO hash password
-        // suppose just insert name and password now
+    public User register(RegisterRequestDTO userDTO){
+
+        if (userDTO.getPassword().length() < 8) {
+            throw new IllegalArgumentException("Password length must be at least 8 characters");
+        }
         // hash the password
         String hashedPassword = passwordEncoder.encode(userDTO.getPassword());
         //User user = userMapper.toDomain(userDTO);
-        User user;
-        if (userDTO.getEmail().equals("admin@example.com")) {
-            user = new User(userDTO.getEmail(), hashedPassword, "ADMIN");
-        } else {
-            user = new User(userDTO.getEmail(), hashedPassword, "USER");
+        // TODO: if user exist
+        EmailAddress emailAddress = new EmailAddress(userDTO.getEmail());
+        User userFromDb = userRepository.findByEmail(emailAddress);
+        if (userFromDb != null){
+            throw new RuntimeException("Email address already exists");
         }
+        User user = new User(userDTO.getEmail(), hashedPassword, Role.STUDENT);
 
         return userRepository.save(user);
     }
 
     public String login(LoginRequestDTO userDTO){
-        // get user by username
-        User userFromDb = userRepository.findByEmail(userDTO.getEmail());
-        if (userFromDb == null) {
-            throw new RuntimeException("User not found");
-        }
-        // compare the hashed password with the password from db
-        if (!passwordEncoder.matches(userDTO.getPassword(), userFromDb.getPassword())) {
-            throw new RuntimeException("Wrong password");
+        EmailAddress emailAddress = new EmailAddress(userDTO.getEmail());
+        User userFromDb = userRepository.findByEmail(emailAddress);
+        if (userFromDb == null || !passwordEncoder.matches(userDTO.getPassword(), userFromDb.getPasswordHashed())) {
+            throw new InvalidCredentialsException("Invalid email or password");
         }
         return jwtService.generateToken(userFromDb.getEmail(), userFromDb.getRole());
 
+    }
 
-
+    public long getUserCount(){
+        return userRepository.count();
     }
 }

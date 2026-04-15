@@ -1,9 +1,11 @@
 package com.facilitybooking.userservice.service;
 
+import com.facilitybooking.userservice.domain.valueobject.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -11,10 +13,11 @@ import java.util.Date;
 
 @Service
 public class JwtService {
-    private final String secretKey = "I+23gWayL7kh6K7hYk1NvtSH/u7ObKL7CaNCUWFX/UM=";
+    @Value("${jwt.secret}")
+    private String secretKey;
     private final long expirationMs = 3600000;
 
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, Role role) {
         return Jwts.builder()
                 .subject(email)
                 .claim("role", role)

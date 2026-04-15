@@ -1,6 +1,5 @@
 package com.facilitybooking.userservice.mapper;
-
-import com.facilitybooking.userservice.domain.User;
+import com.facilitybooking.userservice.domain.entity.User;
 import com.facilitybooking.userservice.dto.LoginRequestDTO;
 import org.springframework.stereotype.Component;
 
