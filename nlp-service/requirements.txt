@@ -1,0 +1,9 @@
+openai
+asyncpg
+aio_pika
+pydantic
+fastapi
+pytest
+uvicorn
+py-eureka-client
+httpsx
