@@ -6,3 +6,4 @@ fastapi
 pytest
 uvicorn
 py-eureka-client
+httpsx

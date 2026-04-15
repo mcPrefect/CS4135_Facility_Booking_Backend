@@ -7,6 +7,7 @@ Wires together all layers: domain, application, infrastructure, and API.
 from __future__ import annotations
 
 import logging
+logging.getLogger("py_eureka_client.eureka_client").setLevel(logging.CRITICAL)
 from contextlib import asynccontextmanager
 
 import asyncpg
@@ -19,6 +20,8 @@ from app.application.service import QueryInterpretationService
 from app.infrastructure.openai_translator import OpenAIResponseTranslator
 from app.infrastructure.postgres_repository import PostgresNLPQueryRepository
 from app.infrastructure.rabbitmq_publisher import RabbitMQPublisher
+from app.infrastructure.facility_client import FacilityServiceClient
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -64,10 +67,14 @@ async def lifespan(app: FastAPI):
         api_key=settings.openai_api_key,
         model=settings.openai_model,
     )
+    
+    facility_client = FacilityServiceClient(base_url=settings.facility_service_url)
+
     service = QueryInterpretationService(
         translator=translator,
         repository=repository,
         publisher=_publisher,
+        facility_client=facility_client,
     )
     set_service(service)
 

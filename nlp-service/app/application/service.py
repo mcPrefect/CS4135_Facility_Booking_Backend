@@ -20,6 +20,7 @@ from app.infrastructure.openai_translator import (
     InterpretationException,
 )
 from app.infrastructure.rabbitmq_publisher import RabbitMQPublisher
+from app.infrastructure.facility_client import FacilityServiceClient
 
 logger = logging.getLogger(__name__)
 
@@ -39,20 +40,14 @@ class QueryInterpretationService:
         translator: OpenAIResponseTranslator,
         repository: NLPQueryRepository,
         publisher: RabbitMQPublisher,
+        facility_client: FacilityServiceClient = None,
     ):
         self.translator = translator
         self.repository = repository
         self.publisher = publisher
+        self.facility_client = facility_client
 
-    async def interpret(self, user_id: str, raw_text: str) -> NLPQuery:
-        """
-        Full interpretation workflow:
-        - Create NLPQuery aggregate
-        - Call OpenAI via ACL
-        - Validate confidence threshold
-        - Persist aggregate
-        - Publish domain events
-        """
+    async def interpret(self, user_id: str, raw_text: str, jwt_token: str = None) -> NLPQuery:
         query = NLPQuery.create(user_id=user_id, raw_text=raw_text)
 
         try:
@@ -64,6 +59,21 @@ class QueryInterpretationService:
                     f"below threshold {MIN_CONFIDENCE_THRESHOLD}"
                 )
             else:
+                # Attempt to resolve facility name to UUID if client is available
+                if self.facility_client and jwt_token:
+                    facility_entities = [
+                        e for e in resolution.entities
+                        if e.entity_type.value == "FACILITY"
+                    ]
+                    for entity in facility_entities:
+                        facility_id = await self.facility_client.resolve_facility_id(
+                            entity.value, jwt_token
+                        )
+                        if facility_id:
+                            logger.info(f"Resolved '{entity.value}' to facilityId: {facility_id}")
+                        else:
+                            logger.warning(f"Could not resolve facility name: '{entity.value}'")
+
                 query.interpret(resolution)
 
         except InterpretationException as e:
@@ -74,10 +84,8 @@ class QueryInterpretationService:
             logger.error(f"Unexpected error interpreting query {query.query_id}: {e}")
             query.mark_failed(f"Internal error: {str(e)}")
 
-        # Persist aggregate (single transaction)
         await self.repository.save(query)
 
-        # Publish domain events only after successful persistence
         for event in query.collect_events():
             try:
                 await self.publisher.publish_event(event)
