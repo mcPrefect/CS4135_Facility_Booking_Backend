@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: facility-service
+  config:
+    import: ""
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+
+eureka:
+  client:
+    enabled: false
+
+app:
+  jwt:
+    secret: test-secret-key-that-is-long-enough-for-hmac-sha256
+    expiration-ms: 3600000
+
+rabbitmq:
+  exchange:
+    facility: facility.events
+  routing-keys:
+    created: facility.created
+    updated: facility.updated
+    status-changed: facility.status.changed
+    maintenance-scheduled: facility.maintenance.scheduled
+
+logging:
+  level:
+    com.plassey.facilityservice: DEBUG

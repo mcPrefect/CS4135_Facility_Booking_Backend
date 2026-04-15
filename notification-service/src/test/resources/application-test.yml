@@ -1,0 +1,49 @@
+spring:
+  config:
+    import: ""           # disable config server in tests
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+  rabbitmq:
+    host: localhost       # overridden by TestContainers dynamic properties
+    port: 5672
+  mail:
+    host: localhost
+    port: 25              # mocked in tests
+
+eureka:
+  client:
+    enabled: false        # no Eureka registration during tests
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      emailDispatch:
+        slidingWindowSize: 3
+        failureRateThreshold: 60
+        waitDurationInOpenState: 1s
+      userServiceCall:
+        slidingWindowSize: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 1s
+  timelimiter:
+    instances:
+      userServiceCall:
+        timeoutDuration: 2s
+
+rabbitmq:
+  exchanges:
+    booking-events: booking.events
+  queues:
+    booking-events: notification.booking.events.queue
+    dlq: booking.events.dlq
+
+server:
+  port: 0               # random port for parallel tests
