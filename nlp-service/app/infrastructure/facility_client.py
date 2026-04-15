@@ -11,19 +11,20 @@ class FacilityServiceClient:
     async def resolve_facility_id(
         self, facility_name: str, jwt_token: str
     ) -> Optional[str]:
-        """Resolves a facility name extracted by NLP to a real facility UUID."""
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    f"{self.base_url}/api/v1/facilities/lookup/batch",
-                    params={"names": [facility_name]},
-                    headers={"Authorization": f"Bearer {jwt_token}"},
-                    timeout=5.0,
-                )
-                if response.status_code == 200:
-                    facilities = response.json()
-                    if facilities:
-                        return facilities[0]["facilityId"]
-        except Exception as e:
-            logger.warning(f"Facility lookup failed for '{facility_name}': {e}")
+        for attempt in range(2):
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(
+                        f"{self.base_url}/api/v1/facilities/lookup/batch",
+                        params={"names": [facility_name]},
+                        headers={"Authorization": f"Bearer {jwt_token}"},
+                        timeout=5.0,
+                    )
+                    if response.status_code == 200:
+                        facilities = response.json()
+                        if facilities:
+                            return facilities[0]["facilityId"]
+            except Exception as e:
+                logger.warning(f"Facility lookup attempt {attempt + 1} failed: {e}")
+                continue  # ← add this line
         return None

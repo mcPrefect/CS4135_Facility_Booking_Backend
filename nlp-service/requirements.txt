@@ -7,3 +7,5 @@ pytest
 uvicorn
 py-eureka-client
 httpsx
+httpx 
+anyio[trio]
