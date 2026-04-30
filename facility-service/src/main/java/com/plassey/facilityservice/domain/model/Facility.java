@@ -16,7 +16,7 @@ import java.util.*;
  *   INV-F2: type is immutable after creation
  *   INV-F3: capacity > 0
  *   INV-F4: RETIRED is a terminal state
- *   INV-L5/F6: maintenance windows validated on addition
+ *   INV-F5/F6: maintenance windows validated on addition
  *   INV-F8: name uniqueness enforced at repository level
  *   INV-F9: cannot be created with RETIRED status
  */
@@ -128,13 +128,13 @@ public class Facility {
 
     /**
      * Status transition with invariant enforcement.
-     * INV-L4: RETIRED is terminal.
+     * INV-F4: RETIRED is terminal.
      */
     public void updateStatus(FacilityStatus newStatus, String reason) {
         Objects.requireNonNull(newStatus, "New status must not be null");
         if (!this.status.canTransitionTo(newStatus)) {
             throw new IllegalStateException(
-                    String.format("Cannot transition from %s to %s (INV-L4)", this.status, newStatus));
+                    String.format("Cannot transition from %s to %s (INV-F4)", this.status, newStatus));
         }
         FacilityStatus oldStatus = this.status;
         this.status = newStatus;
@@ -144,7 +144,7 @@ public class Facility {
 
     /**
      * Adds a maintenance window.
-     * INV-L5: startTime must precede endTime (enforced in MaintenanceWindow constructor).
+     * INV-F5: startTime must precede endTime (enforced in MaintenanceWindow constructor).
      * INV-F6: No overlapping windows for the same facility.
      */
     public MaintenanceWindow addMaintenanceWindow(UUID windowId, java.time.Instant startTime,
