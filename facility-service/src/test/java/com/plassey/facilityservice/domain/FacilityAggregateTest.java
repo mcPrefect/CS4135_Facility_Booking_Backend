@@ -70,31 +70,31 @@ class FacilityAggregateTest {
                 facility.updateStatus(FacilityStatus.AVAILABLE, "reopen"))
                 .withMessageContaining("INV-F4");
     }
-    
+        
     @Test
     void validStatusTransitions_areAllowed() {
-        assertTrue(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.OCCUPIED));
-        assertTrue(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.MAINTENANCE));
-        assertTrue(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.RESTRICTED));
-        assertTrue(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.RETIRED));
-        assertTrue(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.AVAILABLE));
-        assertTrue(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.RETIRED));
-        assertTrue(FacilityStatus.MAINTENANCE.canTransitionTo(FacilityStatus.AVAILABLE));
-        assertTrue(FacilityStatus.MAINTENANCE.canTransitionTo(FacilityStatus.RETIRED));
-        assertTrue(FacilityStatus.RESTRICTED.canTransitionTo(FacilityStatus.AVAILABLE));
-        assertTrue(FacilityStatus.RESTRICTED.canTransitionTo(FacilityStatus.RETIRED));
+        assertThat(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.OCCUPIED)).isTrue();
+        assertThat(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.MAINTENANCE)).isTrue();
+        assertThat(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.RESTRICTED)).isTrue();
+        assertThat(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.RETIRED)).isTrue();
+        assertThat(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.AVAILABLE)).isTrue();
+        assertThat(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.RETIRED)).isTrue();
+        assertThat(FacilityStatus.MAINTENANCE.canTransitionTo(FacilityStatus.AVAILABLE)).isTrue();
+        assertThat(FacilityStatus.MAINTENANCE.canTransitionTo(FacilityStatus.RETIRED)).isTrue();
+        assertThat(FacilityStatus.RESTRICTED.canTransitionTo(FacilityStatus.AVAILABLE)).isTrue();
+        assertThat(FacilityStatus.RESTRICTED.canTransitionTo(FacilityStatus.RETIRED)).isTrue();
     }
     
     @Test
     void invalidStatusTransitions_areBlocked() {
-        assertFalse(FacilityStatus.RETIRED.canTransitionTo(FacilityStatus.AVAILABLE));
-        assertFalse(FacilityStatus.RETIRED.canTransitionTo(FacilityStatus.OCCUPIED));
-        assertFalse(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.MAINTENANCE));
-        assertFalse(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.RESTRICTED));
-        assertFalse(FacilityStatus.MAINTENANCE.canTransitionTo(FacilityStatus.OCCUPIED));
-        assertFalse(FacilityStatus.RESTRICTED.canTransitionTo(FacilityStatus.OCCUPIED));
-        assertFalse(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.AVAILABLE));
-    } 
+        assertThat(FacilityStatus.RETIRED.canTransitionTo(FacilityStatus.AVAILABLE)).isFalse();
+        assertThat(FacilityStatus.RETIRED.canTransitionTo(FacilityStatus.OCCUPIED)).isFalse();
+        assertThat(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.MAINTENANCE)).isFalse();
+        assertThat(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.RESTRICTED)).isFalse();
+        assertThat(FacilityStatus.MAINTENANCE.canTransitionTo(FacilityStatus.OCCUPIED)).isFalse();
+        assertThat(FacilityStatus.RESTRICTED.canTransitionTo(FacilityStatus.OCCUPIED)).isFalse();
+        assertThat(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.AVAILABLE)).isFalse();
+    }
     // ------------------------------------------------------------------
     // INV-F6: maintenance windows cannot overlap
     // ------------------------------------------------------------------
