@@ -5,6 +5,7 @@ import com.plassey.facilityservice.domain.model.FacilityStatus;
 import com.plassey.facilityservice.domain.model.FacilityType;
 import com.plassey.facilityservice.domain.repository.FacilityRepository;
 import com.plassey.facilityservice.infrastructure.persistence.mapper.FacilityMapper;
+import com.plassey.facilityservice.infrastructure.persistence.entity.FacilityJpaEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,10 +21,17 @@ public class FacilityRepositoryImpl implements FacilityRepository {
     public FacilityRepositoryImpl(FacilityJpaRepository jpa) {
         this.jpa = jpa;
     }
-
+    
     @Override
     public Facility save(Facility facility) {
-        var saved = jpa.save(FacilityMapper.toJpa(facility));
+        FacilityJpaEntity entity = FacilityMapper.toJpa(facility);
+    
+        // Carry the existing version forward so @Version optimistic
+        // locking is not broken by the domain --< JPA mapping round-trip
+        jpa.findById(facility.getId())
+           .ifPresent(existing -> entity.setVersion(existing.getVersion()));
+    
+        var saved = jpa.save(entity);
         return FacilityMapper.toDomain(saved);
     }
 
