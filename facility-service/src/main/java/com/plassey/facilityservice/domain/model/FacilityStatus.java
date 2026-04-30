@@ -9,7 +9,7 @@ public enum FacilityStatus {
 
     /**
      * Validates a status transition is legal.
-     * INV-L4: RETIRED is terminal – no transitions out.
+     * INV-F4: RETIRED is terminal – no transitions out.
      */
     public boolean canTransitionTo(FacilityStatus target) {
         if (this == RETIRED) return false;
