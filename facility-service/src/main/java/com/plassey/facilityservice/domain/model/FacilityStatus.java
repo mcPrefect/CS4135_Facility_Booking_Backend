@@ -6,7 +6,7 @@ public enum FacilityStatus {
     MAINTENANCE,
     RESTRICTED,
     RETIRED;
-    
+
         /**
          * Validates a status transition is legal.
          * INV-F4: RETIRED is terminal – no transitions out.
@@ -26,4 +26,5 @@ public enum FacilityStatus {
             case RESTRICTED  -> target == AVAILABLE || target == RETIRED;
             default          -> false;
         };
+    }
 }
