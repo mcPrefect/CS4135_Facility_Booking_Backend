@@ -15,7 +15,7 @@ import java.util.*;
  *   INV-F1: name must be non-null and non-blank
  *   INV-F2: type is immutable after creation
  *   INV-F3: capacity > 0
- *   INV-L4: RETIRED is a terminal state
+ *   INV-F4: RETIRED is a terminal state
  *   INV-L5/F6: maintenance windows validated on addition
  *   INV-F8: name uniqueness enforced at repository level
  *   INV-F9: cannot be created with RETIRED status
