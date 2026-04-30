@@ -55,7 +55,7 @@ class FacilityAggregateTest {
         }
 
     // ------------------------------------------------------------------
-    // INV-L4: RETIRED is terminal
+    // INV-F4: RETIRED is terminal
     // ------------------------------------------------------------------
     @Test
     void retiredFacility_cannotTransitionToAvailable() {
@@ -68,7 +68,7 @@ class FacilityAggregateTest {
 
         assertThatIllegalStateException().isThrownBy(() ->
                 facility.updateStatus(FacilityStatus.AVAILABLE, "reopen"))
-                .withMessageContaining("INV-L4");
+                .withMessageContaining("INV-F4");
     }
 
     // ------------------------------------------------------------------
