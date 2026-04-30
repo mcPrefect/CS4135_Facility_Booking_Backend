@@ -19,8 +19,8 @@ spring:
   mail:
     host: smtp.mailtrap.io
     port: 2525
-    username: your_mailtrap_user
-    password: your_mailtrap_pass
+    username: ${MAIL_USERNAME:your_mailtrap_user}
+    password: ${MAIL_PASSWORD:your_mailtrap_pass}
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
@@ -71,3 +71,6 @@ management:
   endpoint:
     health:
       show-details: always
+  health:
+    mail:
+      enabled: false
