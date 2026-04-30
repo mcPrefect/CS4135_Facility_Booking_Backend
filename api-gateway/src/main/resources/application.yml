@@ -1,0 +1,93 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          "[/**]":
+            allowedOrigins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+      routes:
+        - id: user-service
+          uri: ${USER_SERVICE_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/auth/**,/api/v1/admin/**
+
+        - id: facility-service
+          uri: ${FACILITY_SERVICE_URI:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/facilities/**
+
+        - id: booking-service
+          uri: ${BOOKING_SERVICE_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/v1/bookings/**
+          filters:
+            - name: Retry
+              args:
+                retries: 2
+                methods: GET
+                statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
+          metadata:
+            connect-timeout: 2000
+            response-timeout: 5s
+
+        - id: approval-service
+          uri: ${APPROVAL_SERVICE_URI:http://localhost:8084}
+          predicates:
+            - Path=/api/v1/approvals/**
+          filters:
+            - name: Retry
+              args:
+                retries: 2
+                methods: GET
+                statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
+          metadata:
+            connect-timeout: 2000
+            response-timeout: 5s
+
+        - id: notification-service
+          uri: ${NOTIFICATION_SERVICE_URI:http://localhost:8085}
+          predicates:
+            - Path=/api/v1/notifications/**,/api/v1/logs/**
+          filters:
+            - name: Retry
+              args:
+                retries: 2
+                methods: GET
+                statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
+          metadata:
+            connect-timeout: 2000
+            response-timeout: 5s
+
+        - id: nlp-service
+          uri: ${NLP_SERVICE_URI:http://localhost:8000}
+          predicates:
+            - Path=/api/nlp/**,/api/v1/nlp/**
+
+        - id: unmatched-api-route
+          uri: forward:/__gateway/not-found
+          predicates:
+            - Path=/api/**
