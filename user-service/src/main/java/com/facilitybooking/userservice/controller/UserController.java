@@ -69,7 +69,7 @@ public class UserController {
         return ResponseEntity.ok("student endpoint hit");
     }
 
-    @PreAuthorize("hasRole('STUFF')")
+    @PreAuthorize("hasRole('STAFF')")
     @GetMapping("stuff/test")
     public ResponseEntity<String> stuffTest() {
         return ResponseEntity.ok("stuff endpoint hit");

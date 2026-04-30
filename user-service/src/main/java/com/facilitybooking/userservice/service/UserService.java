@@ -7,6 +7,7 @@ import com.facilitybooking.userservice.dto.LoginRequestDTO;
 import com.facilitybooking.userservice.dto.RegisterRequestDTO;
 import com.facilitybooking.userservice.exception.InvalidCredentialsException;
 import com.facilitybooking.userservice.repository.UserRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +41,11 @@ public class UserService {
         }
         User user = new User(userDTO.getEmail(), hashedPassword, Role.STUDENT);
 
-        return userRepository.save(user);
+        try {
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw  new RuntimeException("Email address already exists");
+        }
     }
 
     public String login(LoginRequestDTO userDTO){
