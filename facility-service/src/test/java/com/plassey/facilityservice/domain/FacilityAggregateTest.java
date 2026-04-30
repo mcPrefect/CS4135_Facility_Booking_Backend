@@ -55,7 +55,7 @@ class FacilityAggregateTest {
         }
 
     // ------------------------------------------------------------------
-    // INV-L4: RETIRED is terminal
+    // INV-F4: RETIRED is terminal
     // ------------------------------------------------------------------
     @Test
     void retiredFacility_cannotTransitionToAvailable() {
@@ -68,9 +68,33 @@ class FacilityAggregateTest {
 
         assertThatIllegalStateException().isThrownBy(() ->
                 facility.updateStatus(FacilityStatus.AVAILABLE, "reopen"))
-                .withMessageContaining("INV-L4");
+                .withMessageContaining("INV-F4");
     }
-
+    
+    @Test
+    void validStatusTransitions_areAllowed() {
+        assertTrue(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.OCCUPIED));
+        assertTrue(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.MAINTENANCE));
+        assertTrue(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.RESTRICTED));
+        assertTrue(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.RETIRED));
+        assertTrue(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.AVAILABLE));
+        assertTrue(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.RETIRED));
+        assertTrue(FacilityStatus.MAINTENANCE.canTransitionTo(FacilityStatus.AVAILABLE));
+        assertTrue(FacilityStatus.MAINTENANCE.canTransitionTo(FacilityStatus.RETIRED));
+        assertTrue(FacilityStatus.RESTRICTED.canTransitionTo(FacilityStatus.AVAILABLE));
+        assertTrue(FacilityStatus.RESTRICTED.canTransitionTo(FacilityStatus.RETIRED));
+    }
+    
+    @Test
+    void invalidStatusTransitions_areBlocked() {
+        assertFalse(FacilityStatus.RETIRED.canTransitionTo(FacilityStatus.AVAILABLE));
+        assertFalse(FacilityStatus.RETIRED.canTransitionTo(FacilityStatus.OCCUPIED));
+        assertFalse(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.MAINTENANCE));
+        assertFalse(FacilityStatus.OCCUPIED.canTransitionTo(FacilityStatus.RESTRICTED));
+        assertFalse(FacilityStatus.MAINTENANCE.canTransitionTo(FacilityStatus.OCCUPIED));
+        assertFalse(FacilityStatus.RESTRICTED.canTransitionTo(FacilityStatus.OCCUPIED));
+        assertFalse(FacilityStatus.AVAILABLE.canTransitionTo(FacilityStatus.AVAILABLE));
+    } 
     // ------------------------------------------------------------------
     // INV-F6: maintenance windows cannot overlap
     // ------------------------------------------------------------------
@@ -94,7 +118,7 @@ class FacilityAggregateTest {
     }
 
     // ------------------------------------------------------------------
-    // INV-L5: maintenance window start must be before end
+    // INV-F5: maintenance window start must be before end
     // ------------------------------------------------------------------
     @Test
     void maintenanceWindow_withStartAfterEnd_throwsException() {
