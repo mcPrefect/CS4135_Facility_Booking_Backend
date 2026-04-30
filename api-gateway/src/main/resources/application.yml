@@ -33,7 +33,7 @@ spring:
         - id: user-service
           uri: ${USER_SERVICE_URI:http://localhost:8081}
           predicates:
-            - Path=/api/v1/auth/**,/api/v1/users/**
+            - Path=/api/v1/auth/**,/api/v1/admin/**
 
         - id: facility-service
           uri: ${FACILITY_SERVICE_URI:http://localhost:8082}
@@ -44,18 +44,50 @@ spring:
           uri: ${BOOKING_SERVICE_URI:http://localhost:8083}
           predicates:
             - Path=/api/v1/bookings/**
+          filters:
+            - name: Retry
+              args:
+                retries: 2
+                methods: GET
+                statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
+          metadata:
+            connect-timeout: 2000
+            response-timeout: 5s
 
         - id: approval-service
           uri: ${APPROVAL_SERVICE_URI:http://localhost:8084}
           predicates:
             - Path=/api/v1/approvals/**
+          filters:
+            - name: Retry
+              args:
+                retries: 2
+                methods: GET
+                statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
+          metadata:
+            connect-timeout: 2000
+            response-timeout: 5s
 
         - id: notification-service
           uri: ${NOTIFICATION_SERVICE_URI:http://localhost:8085}
           predicates:
-            - Path=/api/v1/notifications/**
+            - Path=/api/v1/notifications/**,/api/v1/logs/**
+          filters:
+            - name: Retry
+              args:
+                retries: 2
+                methods: GET
+                statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
+          metadata:
+            connect-timeout: 2000
+            response-timeout: 5s
 
         - id: nlp-service
           uri: ${NLP_SERVICE_URI:http://localhost:8000}
           predicates:
-            - Path=/api/v1/nlp/**
+            - Path=/api/nlp/**,/api/v1/nlp/**
+
+        - id: unmatched-api-route
+          uri: forward:/__gateway/not-found
+          predicates:
+            - Path=/api/**
