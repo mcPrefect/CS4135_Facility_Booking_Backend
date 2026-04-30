@@ -57,7 +57,7 @@ class QueryResponse(BaseModel):
 
 # --- Endpoints ---
 
-@router.post("/query", response_model=QueryResponse, status_code=200)
+@router.post("/query", response_model=QueryResponse, status_code=200, responses={503: {"description": "Service not initialised"},})
 async def interpret_query(
     request: QueryRequest,
     x_user_id: str = Header(default="anonymous", alias="X-User-Id"),
@@ -111,7 +111,9 @@ async def interpret_query(
     return response
 
 
-@router.get("/query/{query_id}", response_model=QueryResponse)
+@router.get("/query/{query_id}", response_model=QueryResponse, responses={
+    503: {"description": "Service not initialised"},
+    404: {"description": "Query not found"},})
 async def get_query(query_id: str):
     """Retrieve a previously submitted query by ID."""
     if _service is None:
