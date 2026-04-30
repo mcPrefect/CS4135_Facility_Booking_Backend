@@ -19,6 +19,9 @@ public class FacilityJpaEntity {
     @Id
     @Column(name = "id", nullable = false)
     private UUID id;
+    
+    @Version
+    private Long version;
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
