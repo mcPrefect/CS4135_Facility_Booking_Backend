@@ -94,7 +94,7 @@ class FacilityAggregateTest {
     }
 
     // ------------------------------------------------------------------
-    // INV-L5: maintenance window start must be before end
+    // INV-F5: maintenance window start must be before end
     // ------------------------------------------------------------------
     @Test
     void maintenanceWindow_withStartAfterEnd_throwsException() {
