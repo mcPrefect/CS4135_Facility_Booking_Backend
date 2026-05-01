@@ -29,15 +29,15 @@ class TestConfidence:
 
     def test_valid_confidence(self):
         c = Confidence(0.94)
-        assert c.value == 0.94
+        assert c.value == pytest.approx(0.94)
 
     def test_zero_confidence(self):
         c = Confidence(0.0)
-        assert c.value == 0.0
+        assert c.value == pytest.approx(0.0)
 
     def test_max_confidence(self):
         c = Confidence(1.0)
-        assert c.value == 1.0
+        assert c.value == pytest.approx(1.0)
 
     def test_negative_confidence_raises(self):
         with pytest.raises(ValueError):
@@ -105,7 +105,7 @@ class TestResolution:
         )
         dto = r.to_booking_request()
         assert dto["intent"] == "CREATE_BOOKING"
-        assert dto["confidence"] == 0.94
+        assert dto["confidence"] == pytest.approx(0.94)
         assert dto["facility"] == "Sports Hall"
         assert dto["date"] == "2026-04-03"
         assert dto["time"] == "15:00"
@@ -244,7 +244,7 @@ class TestDomainEvents:
         assert payload["eventType"] == "BookingIntentResolved"
         assert payload["queryId"] == "q-1"
         assert payload["intent"] == "CREATE_BOOKING"
-        assert payload["confidence"] == 0.94
+        assert payload["confidence"] == pytest.approx(0.94)
         assert payload["entities"]["facility"] == "Sports Hall"
         assert payload["entities"]["date"] == "2026-04-03"
 

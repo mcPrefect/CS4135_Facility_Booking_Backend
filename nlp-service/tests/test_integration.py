@@ -128,7 +128,7 @@ class TestQueryEndpoint:
         assert data["status"] == "RESOLVED"
         assert data["resolution"] is not None
         assert data["resolution"]["intent"]["type"] == "CREATE_BOOKING"
-        assert data["resolution"]["intent"]["confidence"] == 0.9
+        assert data["resolution"]["intent"]["confidence"] == pytest.approx(0.9)
         assert len(data["resolution"]["entities"]) == 3
         assert data["error"] is None
 
