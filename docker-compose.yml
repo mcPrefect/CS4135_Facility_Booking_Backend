@@ -88,6 +88,7 @@ services:
     ports:
       - "8081:8081"
     environment:
+      JWT_SECRET: my-super-secret-key-which-is-long-enough-123456
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
@@ -110,6 +111,7 @@ services:
     ports:
       - "8082:8082"
     environment:
+      JWT_SECRET: my-super-secret-key-which-is-long-enough-123456
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/facility_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
@@ -176,6 +178,7 @@ services:
     ports:
       - "8085:8085"
     environment:
+      JWT_SECRET: my-super-secret-key-which-is-long-enough-123456
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/notification_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
@@ -218,6 +221,14 @@ services:
     ports:
       - "8080:8080"
     environment:
+      JWT_SECRET: my-super-secret-key-which-is-long-enough-123456
+      USER_SERVICE_URI: http://user-service:8081
+      FACILITY_SERVICE_URI: http://facility-service:8082
+      BOOKING_SERVICE_URI: http://booking-service:8083
+      APPROVAL_SERVICE_URI: http://approval-service:8084
+      NOTIFICATION_SERVICE_URI: http://notification-service:8085
+      NLP_SERVICE_URI: http://nlp-service:8000
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     networks:
@@ -237,12 +248,14 @@ services:
   # Frontend
 
   frontend:
-    build: ../CS4135_Facility_Booking_Frontend
+    build:
+      context: ../CS4135_Facility_Booking_Frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
     container_name: plassey-frontend
     ports:
       - "3000:3000"
-    environment:
-      REACT_APP_API_BASE_URL: http://localhost:8080
     networks:
       - plassey-net
     depends_on:
