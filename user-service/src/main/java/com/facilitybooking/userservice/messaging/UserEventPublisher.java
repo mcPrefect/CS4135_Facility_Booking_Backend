@@ -29,27 +29,14 @@ public class UserEventPublisher {
     public void publishUserRegistered(User user) {
         UserRegisteredEvent userRegisteredEvent = userEventMapper.toEvent(user);
 
-        int maxRetries = 3;
-        int attempts = 0;
-
-        while (attempts < maxRetries) {
-            try {
-
-                rabbitTemplate.convertAndSend(exchange, routingKey, userRegisteredEvent);
-                return;
-            } catch (Exception e) {
-                attempts++;
-                log.warn("Attempt {} failed to sent event", attempts, e);
-
-                try {
-                    Thread.sleep(1000);
-
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-            }
+        try {
+            rabbitTemplate.convertAndSend(exchange, routingKey, userRegisteredEvent);
+        } catch (Exception e) {
+            log.warn(
+                    "Failed to publish UserRegistered event for userId={}. Continuing without messaging.",
+                    user.getId(), e
+            );
         }
-        // fallback after all retries fail
-        log.error("Failed to send user registered event, continuing without messaging");
     }
 }
+

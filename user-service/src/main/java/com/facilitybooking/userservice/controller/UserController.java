@@ -35,13 +35,13 @@ public class UserController {
             userResponseDTO.setMessage("User registered successfully");
             return ResponseEntity.ok(userResponseDTO);
         } catch (IllegalArgumentException e) {
-            RegisterResponseDTO userResponseDTO = new RegisterResponseDTO();
-            userResponseDTO.setMessage(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(userResponseDTO);
+            return ResponseEntity
+                    .badRequest()
+                    .body(registerError(e.getMessage()));
         } catch (RuntimeException e) {
-            RegisterResponseDTO userResponseDTO = new RegisterResponseDTO();
-            userResponseDTO.setMessage(e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(userResponseDTO);
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(registerError(e.getMessage()));
         }
     }
 
@@ -55,9 +55,9 @@ public class UserController {
             loginResponseDTO.setToken(token);
             return ResponseEntity.ok(loginResponseDTO);
         } catch (InvalidCredentialsException e) {
-            LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
-            loginResponseDTO.setMessage(e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(loginResponseDTO);
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(loginError(e.getMessage()));
         }
     }
 
@@ -70,8 +70,20 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('STAFF')")
-    @GetMapping("stuff/test")
+    @GetMapping("staff/test")
     public ResponseEntity<String> stuffTest() {
-        return ResponseEntity.ok("stuff endpoint hit");
+        return ResponseEntity.ok("staff endpoint hit");
+    }
+
+    private RegisterResponseDTO registerError(String message) {
+        RegisterResponseDTO dto = new RegisterResponseDTO();
+        dto.setMessage(message);
+        return dto;
+    }
+
+    private LoginResponseDTO loginError(String message) {
+        LoginResponseDTO dto = new LoginResponseDTO();
+        dto.setMessage(message);
+        return dto;
     }
 }
