@@ -1,8 +1,24 @@
 # API Gateway (Spring Cloud Gateway)
 
-Java package: `com.facilitybooking.apigateway` (aligned with other services under `com.facilitybooking.*`).
+Java package: `com.facilitybooking.apigateway`.
 
-Single entry point for the Plassey Planner SPA and external clients. Forwards `/api/v1/**` to downstream services using ports from the team README.
+Single entry point for the Plassey Planner SPA. Routes `/api/v1/**` and `/api/nlp/**` to downstream services.
+
+## JWT validation
+
+The gateway validates **HS256** JWTs using the same secret as `user-service` (`jwt.secret` / env `JWT_SECRET`). Public paths (no `Authorization` header required):
+
+- `POST /api/v1/auth/login`, `POST /api/v1/auth/register`
+- `GET /api/nlp/health`
+- `/actuator/**`
+- Internal forward `/__gateway/not-found`
+
+All other `/api/**` traffic requires `Authorization: Bearer <token>`.
+
+Validated requests receive forwarded headers for downstream services:
+
+- `X-User-Id` — from JWT `userId` claim (fallback: subject)
+- `X-User-Role` — from JWT `role` claim
 
 ## Run locally
 
@@ -14,34 +30,28 @@ mvn spring-boot:run
 - Gateway: [http://localhost:8080](http://localhost:8080)
 - Health: [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)
 
+## Docker
+
+Build context is this directory (`api-gateway/`):
+
+```bash
+docker build -t facility-api-gateway .
+```
+
 ## Environment variables
 
-| Variable | Default | Service |
+| Variable | Default | Purpose |
 | -------- | ------- | ------- |
-| `SERVER_PORT` | `8080` | This gateway |
+| `SERVER_PORT` | `8080` | Gateway listen port |
+| `JWT_SECRET` | (see `application.yml`) | Must match user-service signing key |
+| `CORS_ALLOWED_ORIGINS` | `localhost:3000` and `5173` | Comma-separated browser origins |
 | `USER_SERVICE_URI` | `http://localhost:8081` | User / auth / admin |
 | `FACILITY_SERVICE_URI` | `http://localhost:8082` | Facility |
 | `BOOKING_SERVICE_URI` | `http://localhost:8083` | Booking |
 | `APPROVAL_SERVICE_URI` | `http://localhost:8084` | Approval |
-| `NOTIFICATION_SERVICE_URI` | `http://localhost:8085` | Notification |
+| `NOTIFICATION_SERVICE_URI` | `http://localhost:8085` | Notification + logs |
 | `NLP_SERVICE_URI` | `http://localhost:8000` | NLP |
-| `CORS_ALLOWED_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | Vite dev server (comma-separated) |
 
-Downstream services must expose the same path prefixes (e.g. `/api/v1/auth/login` on user-service). Current routes include:
+## Reliability
 
-- User: `/api/v1/auth/**`, `/api/v1/admin/**`
-- Facilities: `/api/v1/facilities/**`
-- Bookings: `/api/v1/bookings/**`
-- Approvals: `/api/v1/approvals/**`
-- Notifications and logs: `/api/v1/notifications/**`, `/api/v1/logs/**`
-- NLP: `/api/nlp/**` (primary), `/api/v1/nlp/**` (backward-compatible alias)
-
-## JWT
-
-This scaffold does not validate JWT at the gateway; services (or a later filter) can enforce tokens. Add Spring Security resource server here when the team is ready.
-
-## Reliability and error handling
-
-- Booking, approval, and notification routes use retry (GET only) for temporary upstream failures (`502/503/504`).
-- These routes also use per-route connection/response timeouts to fail fast when downstream services are unhealthy.
-- Any unmatched `/api/**` path returns a JSON `404` response from the gateway.
+Booking, approval, and notification routes use GET retries and timeouts. Unmatched `/api/**` returns JSON `404` from `GatewayErrorController`.

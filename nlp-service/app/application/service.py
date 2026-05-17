@@ -60,21 +60,10 @@ class QueryInterpretationService:
                 )
             else:
                 # Attempt to resolve facility name to UUID if client is available
-                if self.facility_client and jwt_token:
-                    facility_entities = [
-                        e for e in resolution.entities
-                        if e.entity_type.value == "FACILITY"
-                    ]
-                    for entity in facility_entities:
-                        facility_id = await self.facility_client.resolve_facility_id(
-                            entity.value, jwt_token
-                        )
-                        if facility_id:
-                            logger.info(f"Resolved '{entity.value}' to facilityId: {facility_id}")
-                        else:
-                            logger.warning(f"Could not resolve facility name: '{entity.value}'")
+                 if self.facility_client and jwt_token:
+                        await self._resolve_facility_names(resolution.entities, jwt_token)
 
-                query.interpret(resolution)
+                        query.interpret(resolution)
 
         except InterpretationException as e:
             logger.warning(f"Interpretation failed for query {query.query_id}: {e}")
@@ -93,6 +82,21 @@ class QueryInterpretationService:
                 logger.error(f"Failed to publish event: {e}")
 
         return query
+    
+    async def _resolve_facility_names(self, entities, jwt_token: str) -> None:
+        """Resolve FACILITY entity names to UUIDs via the Facility Service ACL."""
+        facility_entities = [
+            e for e in entities
+            if e.entity_type.value == "FACILITY"
+        ]
+        for entity in facility_entities:
+            facility_id = await self.facility_client.resolve_facility_id(
+                entity.value, jwt_token
+            )
+            if facility_id:
+                logger.info(f"Resolved '{entity.value}' to facilityId: {facility_id}")
+            else:
+                logger.warning(f"Could not resolve facility name: '{entity.value}'")
 
     async def get_query(self, query_id: str) -> NLPQuery:
         """Retrieve a query by ID."""
