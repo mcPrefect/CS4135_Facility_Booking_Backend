@@ -13,4 +13,5 @@ public class RegisterRequestDTO {
     private String email;
     @NotBlank
     private String password;
+    private String role = "STUDENT";
 }
