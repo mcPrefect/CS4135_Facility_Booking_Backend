@@ -12,19 +12,26 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * Enables @PreAuthorize / @PostAuthorize on controllers.
  * JWT validation is handled by the API Gateway; this service
- * trusts the gateway and permits all incoming requests at the
- * HTTP level, relying on method-level security for fine-grained control.
+ * trusts the gateway and builds a security principal from the
+ * X-User-Id and X-User-Role headers via GatewayTrustFilter.
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private final GatewayTrustFilter gatewayTrustFilter;
+
+    public SecurityConfig(GatewayTrustFilter gatewayTrustFilter) {
+        this.gatewayTrustFilter = gatewayTrustFilter;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, GatewayTrustFilter gatewayTrustFilter) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(gatewayTrustFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated()

@@ -36,7 +36,7 @@ rabbitmq:
     dlq: approval.events.dlq
 
 jwt:
-  secret: plassey-planner-secret-key-for-hs256-minimum-32-bytes
+  secret: ${JWT_SECRET:plassey-planner-secret-key-for-hs256-minimum-32-bytes}
 
 resilience4j:
   circuitbreaker:

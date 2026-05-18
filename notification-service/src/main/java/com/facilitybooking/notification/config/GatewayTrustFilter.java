@@ -13,22 +13,37 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Trusts the API Gateway's identity headers (X-User-Id, X-User-Role) and
+ * builds a Spring Security principal from them, so @PreAuthorize expressions
+ * work without re-validating the JWT in this service.
+ *
+ * The gateway validates the JWT and forwards these headers on every
+ * authenticated request; this filter must run before Spring Security's
+ * authorization checks.
+ */
 @Component
 public class GatewayTrustFilter extends OncePerRequestFilter {
+
+    private static final String USER_ID_HEADER  = "X-User-Id";
+    private static final String USER_ROLE_HEADER = "X-User-Role";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-        String userId = request.getHeader("X-User-Id");
-        String role   = request.getHeader("X-User-Role");
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-        if (userId != null && !userId.isBlank()) {
-            List<SimpleGrantedAuthority> authorities = role != null && !role.isBlank()
-                    ? List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                    : List.of();
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(userId, null, authorities);
+        String userId = request.getHeader(USER_ID_HEADER);
+        String role   = request.getHeader(USER_ROLE_HEADER);
+
+        if (userId != null && role != null
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            // Role values from the gateway are plain strings (e.g. "ADMIN").
+            // Spring Security's hasRole() checks for the "ROLE_" prefix.
+            var authority = new SimpleGrantedAuthority("ROLE_" + role);
+            var auth = new UsernamePasswordAuthenticationToken(userId, null, List.of(authority));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
 

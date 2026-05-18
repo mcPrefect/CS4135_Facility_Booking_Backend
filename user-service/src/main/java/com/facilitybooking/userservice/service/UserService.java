@@ -4,6 +4,7 @@ import com.facilitybooking.userservice.domain.entity.User;
 import com.facilitybooking.userservice.domain.valueobject.EmailAddress;
 import com.facilitybooking.userservice.domain.valueobject.Role;
 import com.facilitybooking.userservice.dto.LoginRequestDTO;
+import com.facilitybooking.userservice.dto.LoginResponseDTO;
 import com.facilitybooking.userservice.dto.RegisterRequestDTO;
 import com.facilitybooking.userservice.exception.InvalidCredentialsException;
 import com.facilitybooking.userservice.repository.UserRepository;

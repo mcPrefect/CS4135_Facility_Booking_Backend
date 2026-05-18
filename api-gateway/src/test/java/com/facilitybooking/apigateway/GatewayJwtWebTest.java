@@ -57,7 +57,31 @@ class GatewayJwtWebTest {
 
     @Test
     void facilitiesWithValidJwtAreNotRejectedByGateway() {
-        String token = Jwts.builder()
+        webTestClient.get()
+                .uri("/api/v1/facilities?page=0&size=1")
+                .header("Authorization", "Bearer " + validStudentToken())
+                .exchange()
+                .expectStatus()
+                .value(status -> assertThat(status).isNotEqualTo(401));
+    }
+
+    @Test
+    void bookingsWithoutBearerAreUnauthorized() {
+        webTestClient.get().uri("/api/v1/bookings").exchange().expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void bookingsWithValidJwtAreNotRejectedByGateway() {
+        webTestClient.get()
+                .uri("/api/v1/bookings")
+                .header("Authorization", "Bearer " + validStudentToken())
+                .exchange()
+                .expectStatus()
+                .value(status -> assertThat(status).isNotEqualTo(401));
+    }
+
+    private static String validStudentToken() {
+        return Jwts.builder()
                 .subject("u@test.com")
                 .claim("userId", "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
                 .claim("role", "STUDENT")
@@ -65,12 +89,5 @@ class GatewayJwtWebTest {
                 .expiration(new Date(System.currentTimeMillis() + 3_600_000))
                 .signWith(Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8)))
                 .compact();
-
-        webTestClient.get()
-                .uri("/api/v1/facilities?page=0&size=1")
-                .header("Authorization", "Bearer " + token)
-                .exchange()
-                .expectStatus()
-                .value(status -> assertThat(status).isNotEqualTo(401));
     }
 }
