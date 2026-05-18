@@ -1,16 +1,23 @@
 package com.facilitybooking.bookingservice.infrastructure.persistence;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -56,5 +63,40 @@ public class FacilityServiceClient {
         fallback.setBookable(false);
         fallback.setReason("Facility Service is currently unavailable. Please try again shortly.");
         return fallback;
+    }
+
+    @SuppressWarnings("unchecked")
+    public UUID lookupFacilityIdByName(String facilityName, String jwtToken) {
+        String encoded = URLEncoder.encode(facilityName, StandardCharsets.UTF_8);
+        String url = facilityServiceUrl + "/api/v1/facilities/lookup/batch?names=" + encoded;
+        log.info("Looking up facility by name: '{}' url={}", facilityName, url);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
+        if (jwtToken != null && !jwtToken.isBlank()) headers.setBearerAuth(jwtToken);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<Object[]> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, Object[].class);
+            Object[] items = response.getBody();
+            log.info("Facility lookup response: {} items", items == null ? "null" : items.length);
+            if (items == null || items.length == 0) {
+                log.warn("No facility found for name: '{}'", facilityName);
+                return null;
+            }
+            Map<String, Object> first = (Map<String, Object>) items[0];
+            String facilityIdStr = (String) first.get("facilityId");
+            if (facilityIdStr == null) {
+                log.warn("Facility found but facilityId missing in response for '{}'", facilityName);
+                return null;
+            }
+            UUID id = UUID.fromString(facilityIdStr);
+            log.info("Resolved facility '{}' to id={}", facilityName, id);
+            return id;
+        } catch (Exception e) {
+            log.error("Facility name lookup failed for '{}': {}", facilityName, e.getMessage(), e);
+            return null;
+        }
     }
 }
