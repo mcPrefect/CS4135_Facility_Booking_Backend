@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: approval-service
+  config:
+    import: optional:configserver:http://localhost:8888
+  datasource:
+    url: jdbc:postgresql://localhost:5432/approval_db
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+server:
+  port: 8084
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
+
+rabbitmq:
+  exchanges:
+    booking-events: booking.events
+    approval-events: approval.events
+  queues:
+    booking-created: approval.booking.created.queue
+    dlq: approval.events.dlq
+
+jwt:
+  secret: plassey-planner-secret-key-for-hs256-minimum-32-bytes
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      bookingService:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+        registerHealthIndicator: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers,metrics
+  endpoint:
+    health:
+      show-details: always
