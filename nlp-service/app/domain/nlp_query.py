@@ -56,7 +56,7 @@ class NLPQuery:
             status=QueryStatus.PENDING,
         )
 
-    def interpret(self, resolution: Resolution) -> None:
+    def interpret(self, resolution: Resolution, jwt_token: str = "") -> None:
         """
         Resolve the query with a successful interpretation.
 
@@ -80,6 +80,7 @@ class NLPQuery:
                 user_id=self.user_id,
                 resolution=resolution,
                 occurred_at=datetime.now(timezone.utc),
+                jwt_token=jwt_token,
             )
         )
 
