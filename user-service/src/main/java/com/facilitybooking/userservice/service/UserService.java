@@ -4,6 +4,7 @@ import com.facilitybooking.userservice.domain.entity.User;
 import com.facilitybooking.userservice.domain.valueobject.EmailAddress;
 import com.facilitybooking.userservice.domain.valueobject.Role;
 import com.facilitybooking.userservice.dto.LoginRequestDTO;
+import com.facilitybooking.userservice.dto.LoginResponseDTO;
 import com.facilitybooking.userservice.dto.RegisterRequestDTO;
 import com.facilitybooking.userservice.exception.InvalidCredentialsException;
 import com.facilitybooking.userservice.repository.UserRepository;
@@ -48,14 +49,17 @@ public class UserService {
         }
     }
 
-    public String login(LoginRequestDTO userDTO){
+    public LoginResponseDTO login(LoginRequestDTO userDTO){
         EmailAddress emailAddress = new EmailAddress(userDTO.getEmail());
         User userFromDb = userRepository.findByEmail(emailAddress);
         if (userFromDb == null || !passwordEncoder.matches(userDTO.getPassword(), userFromDb.getPasswordHashed())) {
             throw new InvalidCredentialsException("Invalid email or password");
         }
-        return jwtService.generateToken(userFromDb.getEmail(), userFromDb.getRole());
-
+        LoginResponseDTO response = new LoginResponseDTO();
+        response.setToken(jwtService.generateToken(userFromDb.getEmail(), userFromDb.getRole(), userFromDb.getId()));
+        response.setEmail(userFromDb.getEmail());
+        response.setUserId(userFromDb.getId().toString());
+        return response;
     }
 
     public long getUserCount(){

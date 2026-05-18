@@ -52,7 +52,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     .parseClaimsJws(token)
                     .getBody();
 
-            String userId = claims.getSubject();
+            String userId = claims.get("userId", String.class);
+            if (userId == null || userId.isBlank()) {
+                userId = claims.getSubject();
+            }
             String role   = claims.get("role", String.class);
 
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {

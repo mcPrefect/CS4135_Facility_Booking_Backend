@@ -134,6 +134,7 @@ services:
     ports:
       - "8083:8083"
     environment:
+      JWT_SECRET: my-super-secret-key-which-is-long-enough-123456
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/booking_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
@@ -156,6 +157,7 @@ services:
     ports:
       - "8084:8084"
     environment:
+      JWT_SECRET: my-super-secret-key-which-is-long-enough-123456
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/approval_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres

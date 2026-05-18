@@ -39,7 +39,7 @@ facility:
     url: http://plassey-facility:8082
 
 jwt:
-  secret: plassey-planner-secret-key-for-hs256-minimum-32-bytes
+  secret: ${JWT_SECRET:plassey-planner-secret-key-for-hs256-minimum-32-bytes}
   circuitbreaker:
     instances:
       facilityService:

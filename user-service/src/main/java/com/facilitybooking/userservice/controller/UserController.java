@@ -50,9 +50,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO userDTO) {
         try {
-            String token = userService.login(userDTO);
-            LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
-            loginResponseDTO.setToken(token);
+            LoginResponseDTO loginResponseDTO = userService.login(userDTO);
             return ResponseEntity.ok(loginResponseDTO);
         } catch (InvalidCredentialsException e) {
             return ResponseEntity
