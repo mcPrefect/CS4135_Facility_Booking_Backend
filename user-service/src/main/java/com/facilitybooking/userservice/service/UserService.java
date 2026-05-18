@@ -40,7 +40,11 @@ public class UserService {
         if (userFromDb != null){
             throw new RuntimeException("Email address already exists");
         }
-        User user = new User(userDTO.getEmail(), hashedPassword, Role.STUDENT);
+        Role role = Role.STUDENT;
+        try {
+            if (userDTO.getRole() != null) role = Role.valueOf(userDTO.getRole().toUpperCase());
+        } catch (IllegalArgumentException ignored) {}
+        User user = new User(userDTO.getEmail(), hashedPassword, role);
 
         try {
             return userRepository.save(user);
@@ -49,17 +53,13 @@ public class UserService {
         }
     }
 
-    public LoginResponseDTO login(LoginRequestDTO userDTO){
+    public User login(LoginRequestDTO userDTO){
         EmailAddress emailAddress = new EmailAddress(userDTO.getEmail());
         User userFromDb = userRepository.findByEmail(emailAddress);
         if (userFromDb == null || !passwordEncoder.matches(userDTO.getPassword(), userFromDb.getPasswordHashed())) {
             throw new InvalidCredentialsException("Invalid email or password");
         }
-        LoginResponseDTO response = new LoginResponseDTO();
-        response.setToken(jwtService.generateToken(userFromDb.getEmail(), userFromDb.getRole(), userFromDb.getId()));
-        response.setEmail(userFromDb.getEmail());
-        response.setUserId(userFromDb.getId().toString());
-        return response;
+        return userFromDb;
     }
 
     public long getUserCount(){

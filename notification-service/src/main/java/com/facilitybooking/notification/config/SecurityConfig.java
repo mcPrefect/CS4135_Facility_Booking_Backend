@@ -27,7 +27,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, GatewayTrustFilter gatewayTrustFilter) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -35,7 +35,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated()
-            );
+            )
+            .addFilterBefore(gatewayTrustFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

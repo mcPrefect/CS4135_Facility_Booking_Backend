@@ -1,6 +1,7 @@
 package com.facilitybooking.bookingservice.infrastructure.persistence;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -15,6 +16,7 @@ public class FacilityExistsResponse {
     private String  facilityId;
     private String  name;
     private String  status;
-    private boolean isBookable;
+    @JsonProperty("isBookable")
+    private boolean bookable;
     private String  reason;
 }

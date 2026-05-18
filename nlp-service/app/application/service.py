@@ -59,11 +59,10 @@ class QueryInterpretationService:
                     f"below threshold {MIN_CONFIDENCE_THRESHOLD}"
                 )
             else:
+                query.interpret(resolution, jwt_token=jwt_token or "")
                 # Attempt to resolve facility name to UUID if client is available
-                 if self.facility_client and jwt_token:
-                        await self._resolve_facility_names(resolution.entities, jwt_token)
-
-                        query.interpret(resolution)
+                if self.facility_client and jwt_token:
+                    await self._resolve_facility_names(resolution.entities, jwt_token)
 
         except InterpretationException as e:
             logger.warning(f"Interpretation failed for query {query.query_id}: {e}")

@@ -2,9 +2,9 @@ package com.facilitybooking.userservice.controller;
 
 import com.facilitybooking.userservice.domain.entity.User;
 import com.facilitybooking.userservice.dto.*;
-//import com.facilitybooking.userservice.dto.UserResponseDTO;
 import com.facilitybooking.userservice.exception.InvalidCredentialsException;
 import com.facilitybooking.userservice.messaging.UserEventPublisher;
+import com.facilitybooking.userservice.service.JwtService;
 import com.facilitybooking.userservice.service.UserService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +21,8 @@ public class UserController {
     private UserService userService;
     @Autowired
     private UserEventPublisher userEventPublisher;
+    @Autowired
+    private JwtService jwtService;
 
     @ApiResponse(responseCode = "200", description = "User registered successfully")
     @PostMapping("/register")
@@ -45,12 +47,16 @@ public class UserController {
         }
     }
 
-
     @ApiResponse(responseCode = "200", description = "User logged in successfully")
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO userDTO) {
         try {
-            LoginResponseDTO loginResponseDTO = userService.login(userDTO);
+            User user = userService.login(userDTO);
+            String token = jwtService.generateToken(user.getEmail(), user.getRole(), user.getId());
+            LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
+            loginResponseDTO.setToken(token);
+            loginResponseDTO.setUserId(user.getId());
+            loginResponseDTO.setEmail(user.getEmail());
             return ResponseEntity.ok(loginResponseDTO);
         } catch (InvalidCredentialsException e) {
             return ResponseEntity
@@ -58,8 +64,6 @@ public class UserController {
                     .body(loginError(e.getMessage()));
         }
     }
-
-
 
     @PreAuthorize("hasRole('STUDENT')")
     @GetMapping("student/test")

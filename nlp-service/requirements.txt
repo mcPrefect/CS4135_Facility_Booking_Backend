@@ -6,6 +6,5 @@ fastapi
 pytest
 uvicorn
 py-eureka-client
-httpsx
-httpx 
+httpx
 anyio[trio]

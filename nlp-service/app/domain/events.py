@@ -19,6 +19,7 @@ class BookingIntentResolved:
     user_id: str
     resolution: Resolution
     occurred_at: datetime
+    jwt_token: str = ""
 
     def to_message_payload(self) -> dict:
         """Serialise to RabbitMQ message format (ACL - outbound translation)."""
@@ -35,6 +36,7 @@ class BookingIntentResolved:
                 "time": booking_data["time"],
                 "duration": booking_data["duration"],
             },
+            "jwtToken": self.jwt_token,
             "occurredAt": self.occurred_at.isoformat(),
         }
 

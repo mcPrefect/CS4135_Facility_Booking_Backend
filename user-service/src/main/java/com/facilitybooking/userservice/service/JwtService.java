@@ -3,7 +3,6 @@ package com.facilitybooking.userservice.service;
 import com.facilitybooking.userservice.domain.valueobject.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,9 +20,10 @@ public class JwtService {
 
     public String generateToken(String email, Role role, UUID userId) {
         return Jwts.builder()
-                .subject(email)
-                .claim("userId", userId.toString())
+                .subject(userId.toString())
                 .claim("role", role)
+                .claim("userId", userId.toString())
+                .claim("email", email)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSigningKey())

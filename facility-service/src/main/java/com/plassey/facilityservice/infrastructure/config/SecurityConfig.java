@@ -41,6 +41,7 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/actuator/**", "/h2-console/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/facilities/lookup/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/facilities/**").authenticated()
                 .requestMatchers(HttpMethod.POST,   "/api/v1/facilities/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT,    "/api/v1/facilities/**").hasRole("ADMIN")
