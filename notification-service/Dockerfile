@@ -1,5 +1,5 @@
 # Build stage
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copy dependency manifest first so Docker cache is reused when source changes

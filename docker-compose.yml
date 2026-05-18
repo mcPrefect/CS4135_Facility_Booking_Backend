@@ -1,4 +1,4 @@
-version: "3.9"
+# version: "3.9"
 
 # Shared network
 networks:
@@ -23,6 +23,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - plassey-net
     healthcheck:
@@ -112,9 +113,15 @@ services:
       - "8082:8082"
     environment:
       JWT_SECRET: my-super-secret-key-which-is-long-enough-123456
+      APP_JWT_SECRET: my-super-secret-key-which-is-long-enough-123456
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/facility_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      DB_URL: jdbc:postgresql://postgres:5432/facility_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_DRIVER: org.postgresql.Driver
+      DB_DIALECT: org.hibernate.dialect.PostgreSQLDialect
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
@@ -134,6 +141,7 @@ services:
     ports:
       - "8083:8083"
     environment:
+      JWT_SECRET: my-super-secret-key-which-is-long-enough-123456
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/booking_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
@@ -156,6 +164,7 @@ services:
     ports:
       - "8084:8084"
     environment:
+      JWT_SECRET: my-super-secret-key-which-is-long-enough-123456
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/approval_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
@@ -203,9 +212,10 @@ services:
     ports:
       - "8000:8000"
     environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/nlp_db
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
       EUREKA_URL: http://eureka-server:8761/eureka
-      FACILITY_SERVICE_URL: http://facility-service:8082
+      FACILITY_SERVICE_URL: http://plassey-facility:8082
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     networks:
       - plassey-net
@@ -247,16 +257,16 @@ services:
 
   # Frontend
 
-  frontend:
-    build:
-      context: ../CS4135_Facility_Booking_Frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: http://localhost:8080
-    container_name: plassey-frontend
-    ports:
-      - "3000:3000"
-    networks:
-      - plassey-net
-    depends_on:
-      - api-gateway
+  # frontend:
+  #   build:
+  #     context: ../CS4135_Facility_Booking_Frontend
+  #     dockerfile: Dockerfile
+  #     args:
+  #       VITE_API_BASE_URL: http://localhost:8080
+  #   container_name: plassey-frontend
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - plassey-net
+  #   depends_on:
+  #     - api-gateway
